@@ -1,21 +1,41 @@
 package se.jbee.build;
 
+import static se.jbee.build.Filter.filter;
+import static se.jbee.build.Folder.folder;
+
 public final class Source {
 
-		public final Folder dir;
-		public final Pattern filter;
+	public static Source parse(String source) {
+		int colon = source.indexOf(':');
+		return colon > 0
+				? new Source(folder(source.substring(0, colon)), filter(source.substring(colon + 1)))
+				: new Source(folder(source));
+	}
 
-		public Source(Folder dir) {
-			this(dir, Pattern.ALL);
-		}
+	public final Folder dir;
+	public final Filter pattern;
 
-		public Source(Folder dir, Pattern filter) {
-			this.dir = dir;
-			this.filter = filter;
-		}
+	public Source(Folder dir) {
+		this(dir, Filter.ALL);
+	}
 
-		@Override
-		public String toString() {
-			return dir+(filter.isFiltered()? filter.toString() : "");
-		}
+	public Source(Folder dir, Filter filter) {
+		this.dir = dir;
+		this.pattern = filter;
+	}
+
+	@Override
+	public String toString() {
+		return dir+(pattern.isFiltered()? pattern.toString() : "");
+	}
+
+	public boolean isSuperset(Source other) {
+		return other.dir.equalTo(dir)
+				&& (other.pattern.equalTo(pattern) || !other.pattern.isFiltered() && pattern.isFiltered());
+	}
+
+	public boolean isSubset(Source other) {
+		return other.dir.equalTo(dir)
+				&& (other.pattern.equalTo(pattern) || !pattern.isFiltered() && other.pattern.isFiltered());
+	}
 }

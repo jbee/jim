@@ -8,8 +8,10 @@ import java.io.IOException;
 
 public class Parser implements AutoCloseable {
 
-	public BufferedReader in;
-	public int lineNr;
+	private BufferedReader in;
+	private int lineNr;
+	private String lastLine;
+	private boolean unread = false;
 
 	@SuppressWarnings("resource")
 	public Parser(File build) throws FileNotFoundException {
@@ -22,8 +24,21 @@ public class Parser implements AutoCloseable {
 	}
 
 	public String readLine() throws IOException {
+		if (unread) {
+			unread = false;
+			return lastLine;
+		}
 		lineNr++;
-		return in.readLine();
+		lastLine = in.readLine();
+		return lastLine;
+	}
+
+	public String lastLine() {
+		return lastLine;
+	}
+
+	public void unreadLine() {
+		unread = true;
 	}
 
 	@Override
@@ -32,7 +47,7 @@ public class Parser implements AutoCloseable {
 	}
 
 	public void fail(String msg) {
-		throw new IllegalArgumentException(msg); //TODO better
+		throw new WrongFormat("Line "+lineNr+": "+msg+" '"+lastLine+"'");
 	}
 
 }

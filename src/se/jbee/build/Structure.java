@@ -36,14 +36,22 @@ public final class Structure {
 	public static final class Module {
 
 		public final Package module;
-		private final Package [] whitelist;
-		private final Package [] blacklist;
+		public final Package [] whitelist;
+		public final Package [] blacklist;
 
-		public Module(Package module, Package[] whitelist, Package[] blacklist) {
+		public Module(Package module, Package... whitelist) {
+			this(module, whitelist, new Package[0]);
+		}
+
+		private Module(Package module, Package[] whitelist, Package[] blacklist) {
 			super();
 			this.module = module;
 			this.whitelist = whitelist;
 			this.blacklist = blacklist;
+		}
+
+		public Module blacklist(Package... packages) {
+			return new Module(module, whitelist, packages);
 		}
 
 		public boolean isAllowed(Package module) {
@@ -53,7 +61,7 @@ public final class Structure {
 			for (int i = 0; i < blacklist.length; i++)
 				if (blacklist[i].equals(module))
 					return false;
-			throw new IllegalArgumentException("Unexpected module: "+module);
+			throw new IncompleteStructureDefinition("Unexpected module: "+module);
 		}
 
 		@Override
