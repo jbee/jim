@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public final class Filter implements Comparable<Filter> {
 
-	public static final Filter ALL = new Filter("*");
+	public static final Filter UNFILTERED = new Filter("*");
 
 	/**
 	 * <pre>
@@ -28,7 +28,7 @@ public final class Filter implements Comparable<Filter> {
 	}
 
 	public boolean isFiltered() {
-		return this != ALL;
+		return this != UNFILTERED;
 	}
 
 	public boolean matches(String s) {

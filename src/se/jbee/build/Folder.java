@@ -7,6 +7,8 @@ package se.jbee.build;
  */
 public final class Folder implements Comparable<Folder> {
 
+	public static final Folder ALL_SOURCES = new Folder("*");
+
 	/**
 	 * <pre>
 	 * main
@@ -15,6 +17,8 @@ public final class Folder implements Comparable<Folder> {
 	 * </pre>
 	 */
 	public static Folder folder(String folder) {
+		if ("*".equals(folder))
+			return ALL_SOURCES;
 		while (folder.length() > 0 && folder.endsWith("/"))
 			folder = folder.substring(0, folder.length()-1);
 		if (!folder.matches("[a-zA-Z0-9][-.+a-zA-Z0-9_/]+"))

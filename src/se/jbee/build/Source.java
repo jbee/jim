@@ -5,6 +5,14 @@ import static se.jbee.build.Folder.folder;
 
 public final class Source {
 
+	public static Source[] split(String sources) {
+		String[] sn = sources.split("[ ,]\\s*");
+		Source[] res = new Source[sn.length];
+		for (int i = 0; i < sn.length; i++)
+			res[i] = Source.parse(sn[i]);
+		return res;
+	}
+
 	public static Source parse(String source) {
 		int colon = source.indexOf(':');
 		return colon > 0
@@ -16,7 +24,7 @@ public final class Source {
 	public final Filter pattern;
 
 	public Source(Folder dir) {
-		this(dir, Filter.ALL);
+		this(dir, Filter.UNFILTERED);
 	}
 
 	public Source(Folder dir, Filter filter) {

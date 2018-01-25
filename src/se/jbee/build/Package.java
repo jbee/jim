@@ -10,6 +10,14 @@ public final class Package implements Comparable<Package> {
 
 	public static final Package SELF = new Package(".");
 
+	public static Package[] split(String packages) {
+		String[] members = packages.trim().replaceAll("[\\[\\]]+", "").split("[ ,]\\s*");
+		Package[] res = new Package[members.length];
+		for (int i = 0; i < members.length; i++)
+			res[i] = pkg(members[i]);
+		return res;
+	}
+
 	public static Package pkg(String name) {
 		if (name.equals("."))
 			return SELF;
@@ -18,10 +26,10 @@ public final class Package implements Comparable<Package> {
 		return new Package(name);
 	}
 
-	public final String name; // for now...
+	public final String name;
 
 	private Package(String name) {
-		this.name = name;
+		this.name = name.intern();
 	}
 
 	@Override
@@ -40,7 +48,7 @@ public final class Package implements Comparable<Package> {
 	}
 
 	public boolean equalTo(Package other) {
-		return this == other || name.equals(other.name);
+		return this == other || name == other.name; // interned names
 	}
 
 	@Override

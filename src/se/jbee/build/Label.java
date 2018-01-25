@@ -11,7 +11,7 @@ public final class Label implements Comparable<Label> {
 	public final String name;
 
 	private Label(String name) {
-		this.name = name;
+		this.name = name.intern();
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public final class Label implements Comparable<Label> {
 	}
 
 	public boolean equalTo(Label other) {
-		return this == other || name.equals(other.name);
+		return this == other || name == other.name; // interned names
 	}
 
 	@Override
