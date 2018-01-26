@@ -8,6 +8,8 @@ package se.jbee.build;
 public final class Folder implements Comparable<Folder> {
 
 	public static final Folder ALL_SOURCES = new Folder("*");
+	public static final Folder TRASH = new Folder("?");
+	public static final Folder HOME = new Folder(".");
 
 	/**
 	 * <pre>
@@ -19,14 +21,18 @@ public final class Folder implements Comparable<Folder> {
 	public static Folder folder(String folder) {
 		if ("*".equals(folder))
 			return ALL_SOURCES;
+		if ("?".equals(folder))
+			return TRASH;
 		while (folder.length() > 0 && folder.endsWith("/"))
 			folder = folder.substring(0, folder.length()-1);
+		if (".".equals(folder) || folder.isEmpty())
+			return HOME;
 		if (!folder.matches("[a-zA-Z0-9][-.+a-zA-Z0-9_/]+"))
-			throw new WrongFormat("Invalid folder: "+folder);
+			throw new WrongFormat("Invalid folder", folder);
 		return new Folder(folder);
 	}
 
-	private final String folder;
+	public final String folder;
 
 	private Folder(String folder) {
 		super();

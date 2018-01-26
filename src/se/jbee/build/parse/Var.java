@@ -1,6 +1,6 @@
 package se.jbee.build.parse;
 
-public interface Variables {
+public interface Var {
 
 	String resolve(String var);
 }

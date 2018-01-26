@@ -1,8 +1,9 @@
 package se.jbee.build;
 
 /**
- * A simple package name, like <code>jbee</code> in the full package name
- * <code>se.jbee.build</code>.
+ * Most often a simple package name, like <code>jbee</code> in the full package
+ * name <code>se.jbee.build</code>. In {@link Structure#base} this might be a
+ * nested package like <code>se.jbee.build</code>.
  *
  * @author jan
  */
@@ -10,19 +11,11 @@ public final class Package implements Comparable<Package> {
 
 	public static final Package SELF = new Package(".");
 
-	public static Package[] split(String packages) {
-		String[] members = packages.trim().replaceAll("[\\[\\]]+", "").split("[ ,]\\s*");
-		Package[] res = new Package[members.length];
-		for (int i = 0; i < members.length; i++)
-			res[i] = pkg(members[i]);
-		return res;
-	}
-
 	public static Package pkg(String name) {
 		if (name.equals("."))
 			return SELF;
-		if (!name.matches("[a-z][a-zA-Z0-9_]+"))
-			throw new WrongFormat("Invalid package name: "+name);
+		if (!name.matches("[.a-zA-Z0-9_]+"))
+			throw new WrongFormat("Invalid package name", name);
 		return new Package(name);
 	}
 

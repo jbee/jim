@@ -1,6 +1,6 @@
 package se.jbee.build.parse;
 
-import static java.util.Arrays.asList;
+import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
 
@@ -10,36 +10,38 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import se.jbee.build.Build;
+import se.jbee.build.Dependency;
+import se.jbee.build.Dest;
 import se.jbee.build.Goal;
 import se.jbee.build.Label;
 import se.jbee.build.Package;
+import se.jbee.build.Packages;
+import se.jbee.build.Runner;
 import se.jbee.build.Sequence;
-import se.jbee.build.Source;
+import se.jbee.build.Src;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.WrongFormat;
 
 public final class Parser implements AutoCloseable {
 
-	public static Build parse(File build) throws FileNotFoundException, IOException, WrongFormat {
+	public static Build parseBuild(File build) throws FileNotFoundException, IOException, WrongFormat {
 		try (Parser in = new Parser(build, null)) {
-			return parse(in);
+			return parseBuild(in);
 		}
 	}
 
-	public static Build parse(Parser in) throws IOException {
+	public static Build parseBuild(Parser in) throws IOException {
 		Structure modules = null;
 		List<Goal> goals = new ArrayList<>();
 		List<Sequence> sequences = new ArrayList<>();
 		String line;
 		try {
 			while ((line = in.readLine()) != null) {
-				if (!line.startsWith("--") && !line.trim().isEmpty()) {
+				if (!isComment(line)) {
 					int colon = line.indexOf(':');
 					if (colon > 0) {
 						int dot = line.indexOf('.');
@@ -59,20 +61,24 @@ public final class Parser implements AutoCloseable {
 		return new Build(modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
 	}
 
+	private static boolean isComment(String line) {
+		return line.matches("--|#|^\\s*$");
+	}
+
 
 	private final BufferedReader in;
-	private final Variables vars;
+	private final Var vars;
 
 	private int lineNr;
 	private String lastLine;
 	private boolean unread = false;
 
 	@SuppressWarnings("resource")
-	public Parser(File build, Variables vars) throws FileNotFoundException {
+	public Parser(File build, Var vars) throws FileNotFoundException {
 		this(new BufferedReader(new FileReader(build)), vars);
 	}
 
-	public Parser(BufferedReader in, Variables vars) {
+	public Parser(BufferedReader in, Var vars) {
 		this.in = in;
 		this.vars = vars;
 	}
@@ -96,6 +102,8 @@ public final class Parser implements AutoCloseable {
 	}
 
 	private String substVars(String line) {
+		if (line == null)
+			return line;
 		int open =line.indexOf('{');
 		while (open >= 0) {
 			int close = line.indexOf('}', open);
@@ -112,54 +120,66 @@ public final class Parser implements AutoCloseable {
 		in.close();
 	}
 
-	private void fail(String msg) {
-		throw new WrongFormat(msg).at(lineNr, lastLine);
+	private void fail(String msg, String expr) {
+		throw new WrongFormat(msg, expr).at(lineNr, lastLine);
 	}
 
 	private Structure parseStructure() throws IOException {
 		String line = lastLine();
 		Package base = pkg(line.substring(0, line.indexOf(':')).trim());
 		line = readLine();
-		Set<Package> above = new HashSet<>();
-		Set<Package> all = new HashSet<>();
+		Packages above = Packages.EMPTY;
 		List<Module> modules = new ArrayList<>();
 		int level = 1;
 		while (line != null && line.startsWith("\t") && line.indexOf('[') > 0) {
 			String[] sets = line.split("\\]\\[");
+			Packages aboveLevel = above;
 			for (String set : sets) {
-				Package[] packages = Package.split(set);
-				above.addAll(asList(packages));
-				all.addAll(asList(packages));
-				Package[] whitelist = above.toArray(new Package[0]);
-				for (Package p : packages) {
-					Module m = new Module(p, level, whitelist);
-					modules.add(m);
-				}
-				above.removeAll(asList(packages)); // other set on same level has no access...
+				Packages packages = Packages.parse(set);
+				Packages whitelist = aboveLevel.union(packages);
+				for (Package p : packages)
+					modules.add(new Module(p, level, whitelist));
+				above = above.union(packages);
 			}
 			level++;
 		}
 		unreadLine();
 		// complete modules with context
 		Module[] layers = new Module[modules.size()];
-		Package[] context = all.toArray(new Package[0]);
 		for (int i = 0; i < layers.length; i++) {
-			layers[i] = modules.get(i).context(context);
+			layers[i] = modules.get(i).context(above);
 		}
 		return new Structure(base, layers);
 	}
 
-	private Goal parseGoal() {
+	private Goal parseGoal() throws IOException {
 		String line = lastLine();
-		Label name = label(line.substring(0, line.indexOf(':')).trim());
-		Source[] sources = Source.split(line.substring(line.indexOf('[')+1, line.indexOf(']')));
-		return null;
+		int colon = line.indexOf(':');
+		if (colon < 0)
+			fail("Expected a goal but found", line);
+		Label name = label(line.substring(0, colon).trim());
+		int endOfSource = line.indexOf(']');
+		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSource));
+		int toAt = line.indexOf(" to ");
+		int ranAt = line.indexOf(" ran ");
+		Dest to = toAt > 0
+				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
+				: Dest.yieldTo(folder("target"));
+		Runner ran = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
+		List<Dependency> dependencies = new ArrayList<>();
+		line = readLine();
+		while (line != null && line.startsWith("\t") && !isComment(line)) {
+			Dependency dep = Dependency.parse(line.trim());
+			//TODO handle * deps
+			dependencies.add(dep);
+		}
+		return new Goal(name, from, to, ran, dependencies.toArray(new Dependency[0]));
 	}
 
 	private Sequence parseSequence() {
 		String line = lastLine();
 		if (line.indexOf("=") <= 0)
-			fail("Expected sequence but found ");
+			fail("Expected sequence but found", line);
 		String[] segs = line.split("\\s*[= ]\\s*");
 		Goal[] seq = new Goal[segs.length-1];
 		for (int i = 1; i < segs.length; i++)

@@ -53,14 +53,14 @@ public final class Structure {
 
 		public final int level;
 		public final Package module;
-		public final Package [] whitelist;
-		public final Package [] context;
+		public final Packages whitelist;
+		public final Packages context;
 
-		public Module(Package module, int level, Package... whitelist) {
-			this(module, level, whitelist, new Package[0]);
+		public Module(Package module, int level, Packages whitelist) {
+			this(module, level, whitelist, Packages.EMPTY);
 		}
 
-		private Module(Package module, int level, Package[] whitelist, Package[] context) {
+		private Module(Package module, int level, Packages whitelist, Packages context) {
 			super();
 			this.module = module;
 			this.level = level;
@@ -68,17 +68,15 @@ public final class Structure {
 			this.context = context;
 		}
 
-		public Module context(Package... packages) {
+		public Module context(Packages packages) {
 			return new Module(module, level, whitelist, packages);
 		}
 
 		public boolean isAllowed(Package module) {
-			for (int i = 0; i < whitelist.length; i++)
-				if (whitelist[i].equals(module))
-					return true;
-			for (int i = 0; i < context.length; i++)
-				if (context[i].equals(module))
-					return false;
+			if (whitelist.contains(module))
+				return true;
+			if (context.contains(module))
+				return false;
 			throw new IncompleteStructureDefinition("Unexpected module: "+module);
 		}
 

@@ -7,11 +7,11 @@ package se.jbee.build;
  */
 public final class File implements Comparable<File> {
 
-	public static final File NONE = new File("");
+	public static final File NO_SPECIFIC = new File("");
 
 	public static File file(String filename) {
 		if (!filename.matches("[-_.+~a-zA-Z0-9]+\\.[a-z]+"))
-			throw new WrongFormat("Invalid filename: "+filename);
+			throw new WrongFormat("Invalid filename", filename);
 		return new File(filename);
 	}
 

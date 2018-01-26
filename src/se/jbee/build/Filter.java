@@ -15,7 +15,7 @@ public final class Filter implements Comparable<Filter> {
 	 */
 	public static Filter filter(String pattern) {
 		if (!pattern.matches("[-_+.*~?a-zA-Z]+"))
-			throw new WrongFormat("Illegal filter: "+pattern);
+			throw new WrongFormat("Illegal filter", pattern);
 		return new Filter(pattern);
 	}
 
