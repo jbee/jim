@@ -48,8 +48,8 @@ public final class Parser implements AutoCloseable {
 							in.vars.defineVar(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
 						} else {
 							in.unreadLine();
-							int dot = line.indexOf('.');
-							if (dot > 0 && dot < colonAt) {
+							int dotAt = line.indexOf('.');
+							if (dotAt > 0 && dotAt < colonAt) {
 								modules = in.parseStructure();
 							} else {
 								goals.add(in.parseGoal());
@@ -109,8 +109,8 @@ public final class Parser implements AutoCloseable {
 			return line;
 		int open =line.indexOf('{');
 		while (open >= 0) {
-			int close = line.indexOf('}', open);
-			String var = line.substring(open+1, close);
+			int closeAt = line.indexOf('}', open);
+			String var = line.substring(open+1, closeAt);
 			String subst = vars.resolve(var, vars);
 			line = line.replace("{"+var+"}", subst);
 			open = line.indexOf('{', open + subst.length() - var.length());
@@ -158,19 +158,19 @@ public final class Parser implements AutoCloseable {
 
 	private Goal parseGoal() throws IOException {
 		String line = readLine();
-		int colon = line.indexOf(':');
-		if (colon < 0)
+		int colonAt = line.indexOf(':');
+		if (colonAt < 0)
 			fail("Expected a goal but found", line);
-		Label name = label(line.substring(0, colon).trim());
-		int endOfSource = line.indexOf(']');
-		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSource));
+		Label name = label(line.substring(0, colonAt).trim());
+		int endOfSourceAt = line.indexOf(']');
+		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSourceAt));
 		int toAt = line.indexOf(" to ");
 		int ranAt = line.indexOf(" run ");
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(Dest.TARGET);
-		Runner ran = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
-		return new Goal(name, from, to, ran, parseDependencies());
+		Runner run = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
+		return new Goal(name, from, to, run, parseDependencies());
 	}
 
 	private Dependency[] parseDependencies() throws IOException {
