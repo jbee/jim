@@ -65,13 +65,17 @@ public final class Dest {
 		this.launcher = launcher;
 	}
 
+	public java.io.File file() {
+			return new java.io.File(new java.io.File(dir.name), artefact.filename);
+	}
+
 	public boolean isDefault() {
 		return type == Type.YIELD && dir.equalTo(TARGET);
 	}
 
 	@Override
 	public String toString() {
-		String res = dir.folder;
+		String res = dir.name;
 		if (!artefact.filename.isEmpty())
 			res += "/"+artefact.filename;
 		if (!launcher.clazz.isEmpty())

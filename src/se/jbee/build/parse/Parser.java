@@ -27,8 +27,8 @@ import se.jbee.build.WrongFormat;
 
 public final class Parser implements AutoCloseable {
 
-	public static Build parseBuild(File build) throws FileNotFoundException, IOException, WrongFormat {
-		try (Parser in = new Parser(build, new Vars())) {
+	public static Build parseBuild(File build, String... args) throws FileNotFoundException, IOException, WrongFormat {
+		try (Parser in = new Parser(build, new Vars(args))) {
 			return parseBuild(in);
 		}
 	}

@@ -1,5 +1,7 @@
 package se.jbee.build;
 
+import java.io.File;
+
 /**
  * A relative path segment like <code>src/main</code>.
  *
@@ -10,6 +12,7 @@ public final class Folder implements Comparable<Folder> {
 	public static final Folder ALL_SOURCES = new Folder("*");
 	public static final Folder TRASH = new Folder("?");
 	public static final Folder HOME = new Folder(".");
+	public static final Folder LIB = folder("lib");
 
 	/**
 	 * <pre>
@@ -32,21 +35,23 @@ public final class Folder implements Comparable<Folder> {
 		return new Folder(folder);
 	}
 
-	public final String folder;
+	public final String name;
+	public final boolean virtual;
 
 	private Folder(String folder) {
 		super();
-		this.folder = folder;
+		this.name = folder;
+		this.virtual = name.equals("*") || name.equals("?");
 	}
 
 	@Override
 	public String toString() {
-		return folder;
+		return name;
 	}
 
 	@Override
 	public int hashCode() {
-		return folder.hashCode();
+		return name.hashCode();
 	}
 
 	@Override
@@ -55,11 +60,16 @@ public final class Folder implements Comparable<Folder> {
 	}
 
 	public boolean equalTo(Folder other) {
-		return this == other || folder.equals(other.folder);
+		return this == other || name.equals(other.name);
 	}
 
 	@Override
 	public int compareTo(Folder other) {
-		return folder.compareTo(other.folder);
+		return name.compareTo(other.name);
+	}
+
+	public File file() {
+		File home = new File(".");
+		return this == HOME ? home : new File(home, name);
 	}
 }

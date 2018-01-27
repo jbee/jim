@@ -45,4 +45,8 @@ public final class Url implements Comparable<Url> {
 	public int compareTo(Url other) {
 		return url.compareTo(other.url);
 	}
+
+	public String filename() {
+		return url.substring(url.lastIndexOf('/')+1);
+	}
 }

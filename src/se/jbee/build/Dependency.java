@@ -6,18 +6,16 @@ import static se.jbee.build.Url.url;
 
 public final class Dependency {
 
-	private static final Folder LIB = folder("lib");
-
 	public static Dependency parse(String dep) {
 		int inAt = dep.indexOf(" in ");
 		int toAt = dep.indexOf(" to ", max(0, inAt));
 		if (inAt < 0 && toAt < 0)
-			return new Dependency(url(dep), Packages.EMPTY, LIB);
+			return new Dependency(url(dep), Packages.EMPTY, Folder.LIB);
 		Url source = url(dep.substring(0, dep.indexOf(' ')));
 		Packages ins = inAt < 0
 				? Packages.EMPTY
 				: Packages.parse(dep.substring(dep.indexOf('[', inAt) + 1, dep.indexOf(']', inAt)));
-		Folder to = toAt < 0 ? LIB : folder(dep.substring(toAt+4).trim());
+		Folder to = toAt < 0 ? Folder.LIB : folder(dep.substring(toAt+4).trim());
 		return new Dependency(source, ins, to);
 	}
 
@@ -37,7 +35,7 @@ public final class Dependency {
 		if (ins.count() > 0) {
 			res += " in "+ins;
 		}
-		if (!to.folder.isEmpty()) {
+		if (!to.name.isEmpty()) {
 			res += " to "+to;
 		}
 		return res;
