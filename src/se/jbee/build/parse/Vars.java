@@ -20,7 +20,8 @@ public final class Vars implements Var {
 	}
 
 	public void defineVar(String name, String val) {
-		vars.put(name, val);
+		if (!vars.containsKey(name))
+			vars.put(name, val);
 	}
 
 	@Override
