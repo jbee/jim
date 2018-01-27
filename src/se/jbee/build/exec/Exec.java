@@ -31,7 +31,7 @@ public final class Exec {
 				res = br.readLine();
 			}
 			p.waitFor();
-			return new Result(p.exitValue(), res);
+			return new Result(p.exitValue(), res == null ? "" : res);
 		} catch (Exception e) {
 			return new Result(-1, e.getMessage());
 		}
