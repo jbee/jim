@@ -41,13 +41,18 @@ public final class Parser implements AutoCloseable {
 		try {
 			while ((line = in.readLine()) != null) {
 				if (!isComment(line)) {
-					int colon = line.indexOf(':');
-					if (colon > 0) {
-						int dot = line.indexOf('.');
-						if (dot > 0 && dot < colon) {
-							modules = in.parseStructure();
+					int colonAt = line.indexOf(':');
+					if (colonAt > 0) {
+						int equalAt = line.indexOf(" = ");
+						if (equalAt > 0) {
+							in.vars.defineVar(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
 						} else {
-							goals.add(in.parseGoal());
+							int dot = line.indexOf('.');
+							if (dot > 0 && dot < colonAt) {
+								modules = in.parseStructure();
+							} else {
+								goals.add(in.parseGoal());
+							}
 						}
 					} else {
 						sequences.add(in.parseSequence());
@@ -61,23 +66,23 @@ public final class Parser implements AutoCloseable {
 	}
 
 	private static boolean isComment(String line) {
-		return line.matches("--|#|^\\s*$");
+		return line.startsWith("--") || line.startsWith("#") || line.matches("^\\s*$");
 	}
 
 
 	private final BufferedReader in;
-	private final Var vars;
+	private final Vars vars;
 
 	private int lineNr;
 	private String lastLine = "";
 	private boolean unread = false;
 
 	@SuppressWarnings("resource")
-	public Parser(File build, Var vars) throws FileNotFoundException {
+	public Parser(File build, Vars vars) throws FileNotFoundException {
 		this(new BufferedReader(new FileReader(build)), vars);
 	}
 
-	public Parser(BufferedReader in, Var vars) {
+	public Parser(BufferedReader in, Vars vars) {
 		this.in = in;
 		this.vars = vars;
 	}

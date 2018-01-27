@@ -18,6 +18,10 @@ public final class Vars implements Var {
 		}
 	}
 
+	public void defineVar(String name, String val) {
+		vars.put(name, val);
+	}
+
 	@Override
 	public String resolve(String varExpr, Var env) {
 		String[] chain = varExpr.split("\\|");

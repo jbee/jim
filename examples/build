@@ -1,3 +1,9 @@
+-- Variables
+repo:maven = http://central.maven.org/maven2
+v:jetty    = 9.4.8.v20171121
+v:junit    = 4.12
+
+# Package structure
 se.jbee.track:
 	[util]
 	[model]
@@ -10,10 +16,10 @@ se.jbee.track:
 	[.]
 
 compile: [src] 
-	http://x.y.z/lmdbjava-0.6.0.jar in [db]
-	http://x.y.z/jetty-9.jar in [http]
+	{repo:maven}/org/eclipse/jetty/aggregate/jetty-all/{v:jetty}/jetty-all-{v:jetty}-uber.jar in [http]
 
-test: [test] run junit			
+test: [test] run junit
+	{repo:maven}/junit/junit/{v:junit}/junit-{v:junit}.jar	
 
 clean: [*] to ?
 

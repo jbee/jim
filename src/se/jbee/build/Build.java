@@ -10,6 +10,20 @@ public final class Build {
 		this.modules = modules;
 		this.goals = goals;
 		this.sequences = sequences;
+		for (Sequence s : sequences)
+			link(s);
+	}
+
+	private void link(Sequence s) {
+		for (int i = 0; i < s.goals.length; i++)
+			s.goals[i] = goal(s.goals[i].name);
+	}
+
+	public Goal goal(Label name) {
+		for (Goal g : goals)
+			if (g.name.equalTo(name))
+				return g;
+		throw new MissingGoal(name);
 	}
 
 	@Override
