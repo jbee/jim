@@ -34,9 +34,12 @@ public final class Vars implements Var {
 				String res = vars.get(var);
 				if (res != null)
 					return res;
-				res = resolveExternal(var, env);
-				vars.put(var, res);
-				return res;
+				if (!vars.containsKey(var)) {
+					res = resolveExternal(var, env);
+					vars.put(var, res);
+					if (res != null)
+						return res;
+				}
 			} else {
 				return var; // a default value
 			}
