@@ -174,10 +174,19 @@ public final class Parser implements AutoCloseable {
 		Runner ran = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
 		List<Dependency> dependencies = new ArrayList<>();
 		line = readLine();
+		Dependency group = null;
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
 			Dependency dep = Dependency.parse(line.trim());
-			//TODO handle * deps
-			dependencies.add(dep);
+			if (dep.source.virtual) {
+				group = dep;
+			} else {
+				if (line.startsWith("\t\t") && group != null) {
+					dep = new Dependency(dep.source,  group.ins, group.to);
+				} else {
+					group = null;
+				}
+				dependencies.add(dep);
+			}
 			line = readLine();
 		}
 		unreadLine();
