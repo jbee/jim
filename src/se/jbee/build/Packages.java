@@ -25,6 +25,17 @@ public final class Packages implements Iterable<Package> {
 		this.set = set;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append('[');
+		for (Package p :set)
+			b.append(p).append(' ');
+		b.setLength(b.length()-1);
+		b.append(']');
+		return b.toString();
+	}
+
 	public boolean contains(Package pkg) {
 		for (int i = 0; i < set.length; i++)
 			if (set[i].equalTo(pkg))

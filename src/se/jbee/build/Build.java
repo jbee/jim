@@ -15,7 +15,7 @@ public final class Build {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append(modules).append("\n\n");
+		b.append(modules).append("\n");
 		for (Goal g : goals)
 			b.append(g).append("\n\n");
 		for (Sequence s : sequences)

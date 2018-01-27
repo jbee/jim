@@ -34,6 +34,8 @@ public final class Goal {
 		if (run != Runner.NONE) {
 			b.append(" run ").append(run);
 		}
+		for (Dependency d : dependencies)
+			b.append("\n\t").append(d);
 		return b.toString();
 	}
 }
