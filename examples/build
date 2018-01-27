@@ -23,7 +23,7 @@ test: [test] run junit
 
 clean: [*] to ?
 
-jar: [src] to collaborate{git:tag}.jar:Application
-uber-jar: [src+] to collaborate-app{git:tag}.jar:Application
+jar: [src] to collaborate-{git:tag}.jar:Application
+uber-jar: [src+] to collaborate-app-{git:tag}.jar:Application
 
 jars = jar uber-jar
