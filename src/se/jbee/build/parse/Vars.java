@@ -16,6 +16,7 @@ public final class Vars implements Var {
 				vars.put(args[i], args[++i]);
 			}
 		}
+		defineVar("time:now", String.valueOf(System.currentTimeMillis()));
 	}
 
 	public void defineVar(String name, String val) {
