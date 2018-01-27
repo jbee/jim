@@ -47,6 +47,7 @@ public final class Parser implements AutoCloseable {
 						if (equalAt > 0) {
 							in.vars.defineVar(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
 						} else {
+							in.unreadLine();
 							int dot = line.indexOf('.');
 							if (dot > 0 && dot < colonAt) {
 								modules = in.parseStructure();
@@ -55,6 +56,7 @@ public final class Parser implements AutoCloseable {
 							}
 						}
 					} else {
+						in.unreadLine();
 						sequences.add(in.parseSequence());
 					}
 				}
@@ -98,10 +100,6 @@ public final class Parser implements AutoCloseable {
 		return lastLine;
 	}
 
-	private String lastLine() {
-		return lastLine;
-	}
-
 	private void unreadLine() {
 		unread = true;
 	}
@@ -130,7 +128,7 @@ public final class Parser implements AutoCloseable {
 	}
 
 	private Structure parseStructure() throws IOException {
-		String line = lastLine();
+		String line = readLine();
 		Package base = pkg(line.substring(0, line.indexOf(':')).trim());
 		line = readLine();
 		Packages above = Packages.EMPTY;
@@ -159,7 +157,7 @@ public final class Parser implements AutoCloseable {
 	}
 
 	private Goal parseGoal() throws IOException {
-		String line = lastLine();
+		String line = readLine();
 		int colon = line.indexOf(':');
 		if (colon < 0)
 			fail("Expected a goal but found", line);
@@ -172,8 +170,12 @@ public final class Parser implements AutoCloseable {
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(Dest.TARGET);
 		Runner ran = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
+		return new Goal(name, from, to, ran, parseDependencies());
+	}
+
+	private Dependency[] parseDependencies() throws IOException {
 		List<Dependency> dependencies = new ArrayList<>();
-		line = readLine();
+		String line = readLine();
 		Dependency group = null;
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
 			Dependency dep = Dependency.parse(line.trim());
@@ -190,11 +192,11 @@ public final class Parser implements AutoCloseable {
 			line = readLine();
 		}
 		unreadLine();
-		return new Goal(name, from, to, ran, dependencies.toArray(new Dependency[0]));
+		return dependencies.toArray(new Dependency[0]);
 	}
 
-	private Sequence parseSequence() {
-		String line = lastLine();
+	private Sequence parseSequence() throws IOException {
+		String line = readLine();
 		if (line.indexOf("=") <= 0)
 			fail("Expected sequence but found", line);
 		String[] segs = line.split("\\s*[= ]\\s*");
