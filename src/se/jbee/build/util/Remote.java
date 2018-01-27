@@ -1,4 +1,4 @@
-package se.jbee.build.io;
+package se.jbee.build.util;
 
 import static java.nio.file.Files.readAllBytes;
 
