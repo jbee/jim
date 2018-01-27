@@ -24,6 +24,6 @@ public final class WrongFormat extends IllegalArgumentException {
 
 	@Override
 	public String toString() {
-		return "Line "+lineNr+": "+getMessage()+" '"+line+"'";
+		return "Line "+lineNr+": "+getMessage()+" '"+expr+"' in '"+ line + "'";
 	}
 }

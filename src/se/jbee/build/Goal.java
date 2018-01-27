@@ -20,4 +20,20 @@ public final class Goal {
 		this.dependencies = dependencies;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(name).append(": [");
+		for (Src s : from)
+			b.append(s).append(' ');
+		b.setLength(b.length()-1);
+		b.append("]");
+		if (!to.isDefault()) {
+			b.append(" to ").append(to);
+		}
+		if (run != Runner.NONE) {
+			b.append(" run ").append(run);
+		}
+		return b.toString();
+	}
 }

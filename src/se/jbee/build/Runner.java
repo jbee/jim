@@ -46,4 +46,15 @@ public final class Runner {
 	public Runner connect(Class<?> impl, Url...dependencies) {
 		return new Runner(tool, goal, args, impl, dependencies);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(tool);
+		if (goal != Label.NONE)
+			b.append(":").append(goal);
+		for (String arg : args)
+			b.append(' ').append(arg);
+		return b.toString();
+	}
 }

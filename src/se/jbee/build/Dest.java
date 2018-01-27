@@ -1,11 +1,13 @@
 package se.jbee.build;
 
+import static java.lang.Math.max;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Main.main;
 
 public final class Dest {
 
 	public static final Dest TRASH = new Dest(Type.ERASE, Folder.TRASH, File.NO_SPECIFIC, Main.NONE);
+	public static final Folder TARGET = folder("target");
 
 	// to
 	// to ?
@@ -19,8 +21,8 @@ public final class Dest {
 		if (dest.contains(".jar:")) {
 			int fileAt = dest.lastIndexOf('/');
 			Folder folder = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
-			int mainAt = dest.lastIndexOf(':', fileAt);
-			File file = null;
+			int mainAt = dest.lastIndexOf(':');
+			File file = File.file(dest.substring(max(0, fileAt), mainAt));
 			return jarTo(folder, file, main(dest.substring(mainAt+1)));
 		}
 		if (dest.endsWith(".jar")) {
@@ -61,6 +63,10 @@ public final class Dest {
 		this.dir = dir;
 		this.artefact = artefact;
 		this.launcher = launcher;
+	}
+
+	public boolean isDefault() {
+		return type == Type.YIELD && dir.equalTo(TARGET);
 	}
 
 	@Override

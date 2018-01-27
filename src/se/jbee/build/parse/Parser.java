@@ -1,6 +1,5 @@
 package se.jbee.build.parse;
 
-import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
 
@@ -29,7 +28,7 @@ import se.jbee.build.WrongFormat;
 public final class Parser implements AutoCloseable {
 
 	public static Build parseBuild(File build) throws FileNotFoundException, IOException, WrongFormat {
-		try (Parser in = new Parser(build, null)) {
+		try (Parser in = new Parser(build, new Vars())) {
 			return parseBuild(in);
 		}
 	}
@@ -70,7 +69,7 @@ public final class Parser implements AutoCloseable {
 	private final Var vars;
 
 	private int lineNr;
-	private String lastLine;
+	private String lastLine = "";
 	private boolean unread = false;
 
 	@SuppressWarnings("resource")
@@ -89,7 +88,8 @@ public final class Parser implements AutoCloseable {
 			return lastLine;
 		}
 		lineNr++;
-		lastLine = substVars(in.readLine());
+		lastLine = in.readLine(); // update temporary so errors during var subst show the line
+		lastLine = substVars(lastLine);
 		return lastLine;
 	}
 
@@ -108,7 +108,7 @@ public final class Parser implements AutoCloseable {
 		while (open >= 0) {
 			int close = line.indexOf('}', open);
 			String var = line.substring(open+1, close);
-			String subst = vars.resolve(var);
+			String subst = vars.resolve(var, vars);
 			line = line.replace("{"+var+"}", subst);
 			open = line.indexOf('{', open + subst.length() - var.length());
 		}
@@ -142,6 +142,7 @@ public final class Parser implements AutoCloseable {
 				above = above.union(packages);
 			}
 			level++;
+			line = readLine();
 		}
 		unreadLine();
 		// complete modules with context
@@ -161,10 +162,10 @@ public final class Parser implements AutoCloseable {
 		int endOfSource = line.indexOf(']');
 		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSource));
 		int toAt = line.indexOf(" to ");
-		int ranAt = line.indexOf(" ran ");
+		int ranAt = line.indexOf(" run ");
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
-				: Dest.yieldTo(folder("target"));
+				: Dest.yieldTo(Dest.TARGET);
 		Runner ran = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
 		List<Dependency> dependencies = new ArrayList<>();
 		line = readLine();
@@ -172,7 +173,9 @@ public final class Parser implements AutoCloseable {
 			Dependency dep = Dependency.parse(line.trim());
 			//TODO handle * deps
 			dependencies.add(dep);
+			line = readLine();
 		}
+		unreadLine();
 		return new Goal(name, from, to, ran, dependencies.toArray(new Dependency[0]));
 	}
 

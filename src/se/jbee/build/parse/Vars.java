@@ -19,7 +19,7 @@ public final class Vars implements Var {
 	}
 
 	@Override
-	public String resolve(String varExpr) {
+	public String resolve(String varExpr, Var env) {
 		String[] chain = varExpr.split("\\|");
 		for (String var : chain) {
 			if (var.startsWith("-")) {
@@ -30,7 +30,7 @@ public final class Vars implements Var {
 				String res = vars.get(var);
 				if (res != null)
 					return res;
-				res = resolveExternal(var);
+				res = resolveExternal(var, env);
 				vars.put(var, res);
 				return res;
 			} else {
@@ -40,11 +40,11 @@ public final class Vars implements Var {
 		return "";
 	}
 
-	private static String resolveExternal(String var) {
+	private static String resolveExternal(String var, Var env) {
 		try {
 			Class<?> resolverType = Class.forName(Var.class.getName()+"_"+var.replace(':', '_'));
 			Var resolver = (Var) resolverType.getDeclaredConstructor().newInstance();
-			return resolver.resolve(var);
+			return resolver.resolve(var, env);
 		} catch (ClassNotFoundException e) {
 			throw new WrongFormat("Unknown variable", var);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException

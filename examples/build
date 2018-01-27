@@ -1,0 +1,23 @@
+se.jbee.track:
+	[util]
+	[model]
+	[db][mail]
+	[engine]
+	[cache]
+	[api]
+	[html]
+	[http]
+	[.]
+
+compile: [src] 
+	http://x.y.z/lmdbjava-0.6.0.jar in [db]
+	http://x.y.z/jetty-9.jar in [http]
+
+test: [test] run junit			
+
+clean: [*] to ?
+
+jar: [src] to collaborate{git:tag}.jar:Application
+uber-jar: [src+] to collaborate-app{git:tag}.jar:Application
+
+jars = jar uber-jar
