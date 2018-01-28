@@ -139,9 +139,9 @@ public final class Parser implements AutoCloseable {
 			Packages aboveLevel = above;
 			for (String set : sets) {
 				Packages packages = Packages.parse(set);
-				Packages whitelist = aboveLevel.union(packages);
+				Packages plusList = aboveLevel.union(packages);
 				for (Package p : packages)
-					modules.add(new Module(p, level, whitelist));
+					modules.add(new Module(p, level, p.plus ? plusList : above));
 				above = above.union(packages);
 			}
 			level++;

@@ -18,13 +18,14 @@ se.jbee.track:
 compile: [src] 
 	{repo:maven}/org/eclipse/jetty/aggregate/jetty-all/{v:jetty}/jetty-all-{v:jetty}-uber.jar in [http]
 
-test: [src test] run junit
+junit: [test] run junit
 	* to xlib
 		{repo:maven}/junit/junit/{v:junit}/junit-{v:junit}.jar	
 
 clean: [*] to ?
 
-jar: [src] to collaborate-{git:tag}.jar:Application
+lib-jar: [src] to collaborate-{git:tag}.jar:Application
 uber-jar: [src+] to collaborate-app-{git:tag}.jar:Application
 
-jars = jar uber-jar
+jar = lib-jar uber-jar
+test = compile junit
