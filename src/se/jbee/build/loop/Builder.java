@@ -1,10 +1,10 @@
-package se.jbee.build.exec;
+package se.jbee.build.loop;
 
 import se.jbee.build.Build;
 import se.jbee.build.Dependency;
 import se.jbee.build.Goal;
 import se.jbee.build.Label;
-import se.jbee.build.util.Remote;
+import se.jbee.build.tool.Remote;
 
 public class Builder {
 

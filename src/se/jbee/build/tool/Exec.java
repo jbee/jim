@@ -1,4 +1,4 @@
-package se.jbee.build.util;
+package se.jbee.build.tool;
 
 import java.io.BufferedReader;
 import java.io.File;

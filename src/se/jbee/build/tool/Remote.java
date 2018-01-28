@@ -1,4 +1,4 @@
-package se.jbee.build.util;
+package se.jbee.build.tool;
 
 import static java.nio.file.Files.readAllBytes;
 
@@ -27,7 +27,7 @@ import se.jbee.build.Size;
 public final class Remote {
 
 	public static void fetch(Dependency dep, boolean replaceExisting) {
-		File target = new File(dep.to.file(), dep.source.filename());
+		File target = new File(dep.to.toFile(), dep.source.filename());
 		if (target.exists() && !replaceExisting)
 			return;
 		try {

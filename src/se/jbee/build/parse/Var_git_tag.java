@@ -1,7 +1,7 @@
 package se.jbee.build.parse;
 
-import se.jbee.build.util.Exec;
-import se.jbee.build.util.Exec.Output;
+import se.jbee.build.tool.Exec;
+import se.jbee.build.tool.Exec.Output;
 
 /**
  * Uses <code>git<code> git resolve a version number from git tags.

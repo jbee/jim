@@ -68,7 +68,7 @@ public final class Folder implements Comparable<Folder> {
 		return name.compareTo(other.name);
 	}
 
-	public File file() {
+	public File toFile() {
 		File home = new File(".");
 		return this == HOME ? home : new File(home, name);
 	}
