@@ -13,4 +13,10 @@ public class TestParser {
 		Build build = Parser.parseBuild(new File("./examples/build"));
 		System.out.println(build);
 	}
+
+	@Test
+	public void parseJimBuildFile() throws Exception {
+		Build build = Parser.parseBuild(new File("./.jim/build"));
+		System.out.println(build);
+	}
 }

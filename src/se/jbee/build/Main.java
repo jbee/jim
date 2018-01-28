@@ -23,6 +23,10 @@ public final class Main implements Comparable<Main> {
 		this.qulified = clazz.indexOf('.') > 0;
 	}
 
+	public boolean isNone() {
+		return this.clazz.isEmpty();
+	}
+
 	@Override
 	public String toString() {
 		return clazz;

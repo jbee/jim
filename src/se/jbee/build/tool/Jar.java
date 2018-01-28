@@ -17,7 +17,8 @@ public final class Jar {
 		Manifest mf = new Manifest();
 		Attributes main = mf.getMainAttributes();
 		main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		main.put(Attributes.Name.MAIN_CLASS, clazz.toString());
+		if (!clazz.isNone())
+			main.put(Attributes.Name.MAIN_CLASS, clazz.toString());
 		try (JarOutputStream out = new JarOutputStream(new FileOutputStream(jar), mf)) {
 			putEntriesRecursively(classes, out);
 		}

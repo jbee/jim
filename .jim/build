@@ -1,0 +1,14 @@
+--
+-- JIM's own build file
+--
+
+se.jbee.build:
+	[.]
+	[parse][tool]
+	[loop]
+	
+compile: [src]
+
+test: [test] run junit
+
+jar: [src] to jim-{git-tag}.jar
