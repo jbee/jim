@@ -14,36 +14,45 @@ public final class Src {
 	}
 
 	public static Src parse(String source) {
-		boolean inclusive = source.endsWith("+");
-		if (inclusive)
+		boolean depsInJar = source.endsWith("++");
+		if (depsInJar)
+			source = source.substring(0, source.length()-2);
+		boolean depsOnCP = source.endsWith("+");
+		if (depsOnCP)
 			source = source.substring(0, source.length()-1);
 		int colon = source.indexOf(':');
 		return colon > 0
-				? new Src(folder(source.substring(0, colon)), filter(source.substring(colon + 1)), inclusive)
-				: new Src(folder(source), inclusive);
+				? new Src(folder(source.substring(0, colon)), filter(source.substring(colon + 1)), depsOnCP, depsInJar)
+				: new Src(folder(source), depsOnCP, depsInJar);
 	}
 
 	public final Folder dir;
 	public final Filter pattern;
 	/**
-	 * Should the dependencies of the source be included.
-	 * What "included" means depends on the goal type.
+	 * Should the dependencies of the source be added to the class-path of created
+	 * jar.
 	 */
-	public final boolean includive;
+	public final boolean depsOnCP;
+	/**
+	 * Should the dependencies of the source be extracted from their jar and added
+	 * into the created jar ("uber-jar").
+	 */
+	public final boolean depsInJar;
 
-	public Src(Folder dir, boolean includive) {
-		this(dir, Filter.UNFILTERED, includive);
+	public Src(Folder dir, boolean depsOnCP, boolean depsInJar) {
+		this(dir, Filter.UNFILTERED, depsOnCP, depsInJar);
 	}
 
-	public Src(Folder dir, Filter filter, boolean includive) {
+	public Src(Folder dir, Filter filter, boolean depsOnCP, boolean depsInJar) {
 		this.dir = dir;
 		this.pattern = filter;
-		this.includive = includive;
+		this.depsOnCP = depsOnCP;
+		this.depsInJar = depsInJar;
 	}
 
 	@Override
 	public String toString() {
-		return dir+(pattern.isFiltered()? pattern.toString() : "")+(includive ? "+" : "");
+		return dir+(pattern.isFiltered()? pattern.toString() : "")+(depsOnCP ? "+" : "");
 	}
 
 	public boolean isSuperset(Src other) {

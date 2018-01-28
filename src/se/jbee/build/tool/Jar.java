@@ -13,6 +13,10 @@ import se.jbee.build.Main;
 
 public final class Jar {
 
+	//TODO a "uber jar" would be to include the contents of the depenndecies in the created jar file.
+	// a referencing jar just adds entries to the jar class-path in MF that reference the dependencies jars in their expected folder (outside of the jar).
+	// this makes it much easier to run the resulting jar simply using: java - jar my.jar
+
 	public static void jar(File classes, Main clazz, File jar) throws IOException {
 		Manifest mf = new Manifest();
 		Attributes main = mf.getMainAttributes();
@@ -25,7 +29,7 @@ public final class Jar {
 	}
 
 	/**
-	 * Correct the paths to conform with zip spec:
+	 * Correct java paths to conform with zip spec:
 	 * <ul>
 	 * <li>Directory names must end with a '/' slash.</li>
      * <li>Paths must use '/' slashes, not '\'</li>
