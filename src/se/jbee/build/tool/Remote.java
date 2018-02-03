@@ -22,12 +22,13 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 import se.jbee.build.Dependency;
+import se.jbee.build.Home;
 import se.jbee.build.Size;
 
 public final class Remote {
 
-	public static void fetch(Dependency dep, boolean replaceExisting) {
-		File target = new File(dep.to.toFile(), dep.source.filename());
+	public static void fetch(Home home, Dependency dep, boolean replaceExisting) {
+		File target = new File(dep.to.toFile(home), dep.source.filename());
 		if (target.exists() && !replaceExisting)
 			return;
 		try {

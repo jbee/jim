@@ -75,4 +75,15 @@ public final class Packages implements Iterable<Package> {
 			res = copyOf(res, j);
 		return new Packages(res);
 	}
+
+	public Packages subtract(Packages others) {
+		if (others.set.length == 0 || set.length == 0)
+			return this;
+		Package[] res = new Package[set.length];
+		int i = 0;
+		for (Package p : this)
+			if (!others.contains(p))
+				res[i++] = p;
+		return i == set.length ? this : new Packages(copyOf(res, i));
+	}
 }

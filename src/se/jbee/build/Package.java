@@ -23,6 +23,7 @@ public final class Package implements Comparable<Package> {
 	}
 
 	public final String name;
+	public final String path;
 	/**
 	 * This package is the one of a group that may depend upon others in that group.
 	 */
@@ -30,6 +31,7 @@ public final class Package implements Comparable<Package> {
 
 	private Package(String name, boolean plus) {
 		this.name = name.intern();
+		this.path = name+".";
 		this.plus = plus;
 	}
 

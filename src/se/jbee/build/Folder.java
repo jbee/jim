@@ -7,7 +7,7 @@ import java.io.File;
  *
  * @author jan
  */
-public final class Folder implements Comparable<Folder> {
+public final class Folder implements Comparable<Folder>, Location {
 
 	public static final Folder ALL_SOURCES = new Folder("*");
 	public static final Folder TRASH = new Folder("?");
@@ -68,8 +68,8 @@ public final class Folder implements Comparable<Folder> {
 		return name.compareTo(other.name);
 	}
 
-	public File toFile() {
-		File home = new File(".");
-		return this == HOME ? home : new File(home, name);
+	@Override
+	public File toFile(Home home) {
+		return this == HOME ? home.dir : new File(home.dir, name);
 	}
 }

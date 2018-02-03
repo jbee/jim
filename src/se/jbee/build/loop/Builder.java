@@ -13,7 +13,7 @@ public class Builder {
 	public static void run(Build build, Label goal) {
 		Goal g = build.goal(goal);
 		for (Dependency d : g.dependencies)
-			Remote.fetch(d, true);
+			Remote.fetch(build.home, d, true);
 	}
 
 

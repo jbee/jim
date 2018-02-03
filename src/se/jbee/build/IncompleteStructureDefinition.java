@@ -1,9 +1,11 @@
 package se.jbee.build;
 
+import se.jbee.build.Structure.Module;
+
 public class IncompleteStructureDefinition extends IllegalArgumentException {
 
-	public IncompleteStructureDefinition(String s) {
-		super(s);
+	public IncompleteStructureDefinition(Module module, Package pkg) {
+		super("Unexpected module: "+pkg);
 	}
 
 }

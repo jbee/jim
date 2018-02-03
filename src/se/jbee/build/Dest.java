@@ -9,24 +9,32 @@ public final class Dest {
 	public static final Dest TRASH = new Dest(Type.ERASE, Folder.TRASH, Filename.NO_SPECIFIC, Main.NONE);
 	public static final Folder TARGET = folder("target");
 
-	// to
-	// to ?
-	// to some/folder/
-	// to some/folder/some.jar
-	// to some/folder/some.jar:MainClass
 
+	/**
+	 * Possible destination expressions:
+	 * <pre>
+	 * (empty)
+	 * ?
+	 * some/folder/
+	 * some/folder/some.jar
+	 * some/folder/some.jar:MainClass
+	 * </pre>
+	 */
 	public static Dest parse(String dest) {
 		if (dest.isEmpty() || "?".equals(dest))
 			return TRASH;
 		if (dest.contains(".jar:")) {
 			int fileAt = dest.lastIndexOf('/');
-			Folder folder = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
+			Folder dir = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
 			int mainAt = dest.lastIndexOf(':');
-			Filename file = Filename.file(dest.substring(max(0, fileAt), mainAt));
-			return jarTo(folder, file, main(dest.substring(mainAt+1)));
+			Filename jar = Filename.file(dest.substring(max(0, fileAt), mainAt));
+			return jarTo(dir, jar, main(dest.substring(mainAt+1)));
 		}
 		if (dest.endsWith(".jar")) {
-
+			int fileAt = dest.lastIndexOf('/');
+			Folder dir = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
+			Filename jar = Filename.file(dest.substring(max(0, fileAt)));
+			return jarTo(dir, jar);
 		}
 		return yieldTo(folder(dest));
 	}

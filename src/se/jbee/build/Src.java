@@ -52,16 +52,19 @@ public final class Src {
 
 	@Override
 	public String toString() {
-		return dir+(pattern.isFiltered()? pattern.toString() : "")+(depsOnCP ? "+" : "");
+		return dir+(pattern.isFiltered()? ":"+pattern.toString() : "")+(depsOnCP ? "+" : "");
 	}
 
 	public boolean isSuperset(Src other) {
-		return other.dir.equalTo(dir)
-				&& (other.pattern.equalTo(pattern) || !other.pattern.isFiltered() && pattern.isFiltered());
+		return isSuperset(this, other);
 	}
 
 	public boolean isSubset(Src other) {
-		return other.dir.equalTo(dir)
-				&& (other.pattern.equalTo(pattern) || !pattern.isFiltered() && other.pattern.isFiltered());
+		return isSuperset(other, this);
+	}
+
+	public static boolean isSuperset(Src a, Src b) {
+		return b.dir.equalTo(a.dir)
+				&& (b.pattern.equalTo(a.pattern) || !b.pattern.isFiltered() && a.pattern.isFiltered());
 	}
 }

@@ -2,11 +2,13 @@ package se.jbee.build;
 
 public final class Build {
 
+	public final Home home;
 	public final Structure modules;
 	public final Goal[] goals;
 	public final Sequence[] sequences;
 
-	public Build(Structure modules, Goal[] goals, Sequence[] sequences) {
+	public Build(Home home, Structure modules, Goal[] goals, Sequence[] sequences) {
+		this.home = home;
 		this.modules = modules;
 		this.goals = goals;
 		this.sequences = sequences;

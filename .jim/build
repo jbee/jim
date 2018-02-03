@@ -9,6 +9,6 @@ se.jbee.build:
 	
 compile: [src]
 
-test: [test] run junit
+test: [test:Test*.java] run junit
 
 jar: [src] to jim-{git-tag}.jar

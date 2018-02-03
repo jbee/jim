@@ -11,7 +11,7 @@ public final class Runner {
 	public final Label goal;
 	public final String [] args;
 	public final Class<?> impl;
-	public final Url[] dependencies;
+	public final Url[] deps;
 
 	public static Runner parse(String runner) {
 		String[] nameAndArgs = runner.split("\\s+");
@@ -35,12 +35,12 @@ public final class Runner {
 		this(tool, goal, args, null, new Url[0]);
 	}
 
-	private Runner(Label tool, Label goal, String[] args, Class<?> impl, Url[] dependencies) {
+	private Runner(Label tool, Label goal, String[] args, Class<?> impl, Url[] deps) {
 		this.tool = tool;
 		this.goal = goal;
 		this.args = args;
 		this.impl = impl;
-		this.dependencies = dependencies;
+		this.deps = deps;
 	}
 
 	public Runner connect(Class<?> impl, Url...dependencies) {

@@ -15,6 +15,7 @@ import se.jbee.build.Build;
 import se.jbee.build.Dependency;
 import se.jbee.build.Dest;
 import se.jbee.build.Goal;
+import se.jbee.build.Home;
 import se.jbee.build.Label;
 import se.jbee.build.Package;
 import se.jbee.build.Packages;
@@ -28,12 +29,13 @@ import se.jbee.build.WrongFormat;
 public final class Parser implements AutoCloseable {
 
 	public static Build parseBuild(File build, String... args) throws FileNotFoundException, IOException, WrongFormat {
+		Home home = new Home(build.getParentFile().getParentFile());
 		try (Parser in = new Parser(build, new Vars(args))) {
-			return parseBuild(in);
+			return parseBuild(home, in);
 		}
 	}
 
-	public static Build parseBuild(Parser in) throws IOException {
+	public static Build parseBuild(Home home, Parser in) throws IOException {
 		Structure modules = null;
 		List<Goal> goals = new ArrayList<>();
 		List<Sequence> sequences = new ArrayList<>();
@@ -64,7 +66,7 @@ public final class Parser implements AutoCloseable {
 		} catch (WrongFormat e) {
 			throw e.at(in.lineNr, in.lastLine);
 		}
-		return new Build(modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
+		return new Build(home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
 	}
 
 	private static boolean isComment(String line) {
@@ -141,7 +143,7 @@ public final class Parser implements AutoCloseable {
 				Packages packages = Packages.parse(set);
 				Packages plusList = aboveLevel.union(packages);
 				for (Package p : packages)
-					modules.add(new Module(p, level, p.plus ? plusList : above));
+					modules.add(new Module(base, p, level, p.plus ? plusList : above));
 				above = above.union(packages);
 			}
 			level++;
@@ -151,9 +153,9 @@ public final class Parser implements AutoCloseable {
 		// complete modules with context
 		Module[] layers = new Module[modules.size()];
 		for (int i = 0; i < layers.length; i++) {
-			layers[i] = modules.get(i).context(above);
+			layers[i] = modules.get(i).in(above);
 		}
-		return new Structure(base, layers);
+		return new Structure(layers);
 	}
 
 	private Goal parseGoal() throws IOException {
