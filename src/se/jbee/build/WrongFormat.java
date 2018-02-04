@@ -1,6 +1,6 @@
 package se.jbee.build;
 
-public final class WrongFormat extends IllegalArgumentException {
+public final class WrongFormat extends BuildIssue {
 
 	public final String expr;
 	public final int lineNr;

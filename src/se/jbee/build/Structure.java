@@ -3,6 +3,8 @@ package se.jbee.build;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import se.jbee.build.BuildIssue.IncompleteStructureDefinition;
+
 /**
  * The inter-module dependencies.
  *
@@ -105,7 +107,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 				return true;
 			if (fanOut.contains(sibling))
 				return false;
-			throw new IncompleteStructureDefinition(this, sibling);
+			throw new BuildIssue.IncompleteStructureDefinition(this, sibling);
 		}
 
 		public boolean isAccessible(String packageName) {

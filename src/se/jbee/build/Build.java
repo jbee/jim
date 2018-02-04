@@ -25,7 +25,7 @@ public final class Build {
 		for (Goal g : goals)
 			if (g.name.equalTo(name))
 				return g;
-		throw new MissingGoal(name, this);
+		throw new BuildIssue.MissingGoal(name, this);
 	}
 
 	public Label[] goals() {
