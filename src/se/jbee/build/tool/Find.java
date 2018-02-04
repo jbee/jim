@@ -10,7 +10,7 @@ import se.jbee.build.Folder;
 import se.jbee.build.Home;
 import se.jbee.build.Main;
 
-public class Find {
+public interface Find {
 
 	public static String qualifiedName(Home dir, Folder subdir, Main clazz) {
 		String filename = clazz.clazz+".java";

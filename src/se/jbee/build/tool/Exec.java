@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 
-public final class Exec {
+public interface Exec {
 
-	public static class Output {
+	public class Output {
 		public final int exitCode;
 		public final String msg;
 

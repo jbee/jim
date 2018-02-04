@@ -26,7 +26,9 @@ public abstract class BuildIssue extends RuntimeException {
 	public static final class IncompleteStructureDefinition extends BuildIssue {
 
 		public IncompleteStructureDefinition(Module module, Package pkg) {
-			super("Unexpected module: "+pkg);
+			super("Unexpected module: " + pkg
+					+ "\nMost likely a added module is missing in the module definition, known are: "
+					+ module.fanIn.union(module.fanOut));
 		}
 	}
 
@@ -47,7 +49,7 @@ public abstract class BuildIssue extends RuntimeException {
 	public static final class AmbiguousSource extends BuildIssue {
 
 		public AmbiguousSource(Main clazz, Path one, Path other) {
-			super("Referenced source is not unique: "+clazz);
+			super("Referenced source is not unique: "+clazz+"\nFound: "+one+"\nand: "+other);
 		}
 	}
 }
