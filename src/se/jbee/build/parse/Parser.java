@@ -170,7 +170,7 @@ public final class Parser implements AutoCloseable {
 		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSourceAt));
 		int toAt = line.indexOf(" to ");
 		int ranAt = line.indexOf(" run ");
-		Folder dir = folder(vars.resolve("default:to", vars));
+		Folder dir = folder(vars.resolve(Var.DEFAULT_OUTDIR, vars));
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(dir);
@@ -182,13 +182,16 @@ public final class Parser implements AutoCloseable {
 		List<Dependency> dependencies = new ArrayList<>();
 		String line = readLine();
 		Dependency group = null;
+		Folder to = folder(vars.resolve(Var.DEFAULT_LIBDIR, vars));
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
-			Dependency dep = Dependency.parse(line.trim());
+			Dependency dep = Dependency.parse(line.trim(), to);
 			if (dep.source.virtual) {
 				group = dep;
 			} else {
 				if (line.startsWith("\t\t") && group != null) {
-					dep = new Dependency(dep.source,  group.ins, group.to);
+					dep = new Dependency(dep.source,
+						dep.ins == Packages.EMPTY ? group.ins : dep.ins,
+						dep.to == to ? group.to : dep.to);
 				} else {
 					group = null;
 				}

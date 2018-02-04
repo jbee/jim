@@ -15,7 +15,7 @@ public class TestParser {
 
 	@Test
 	public void parseTrackerBuildFile() throws Exception {
-		Build build = Parser.parseBuild(new File("./examples/build"));
+		Build build = Parser.parseBuild(new File("./examples/collaborate/build"));
 		System.out.println(build);
 	}
 

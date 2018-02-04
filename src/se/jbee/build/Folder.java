@@ -9,10 +9,12 @@ import java.io.File;
  */
 public final class Folder implements Comparable<Folder>, Location {
 
-	public static final Folder ALL_SOURCES = new Folder("*");
-	public static final Folder TRASH = new Folder("?");
-	public static final Folder HOME = new Folder(".");
-	public static final Folder LIB = folder("lib");
+	public static final Folder
+		ALL_SOURCES = new Folder("*"),
+		TRASH = new Folder("?"),
+		HOME = new Folder("."),
+		LIB = folder("lib"),
+		OUTPUT = folder("target");
 
 	/**
 	 * <pre>

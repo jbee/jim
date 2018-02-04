@@ -1,0 +1,10 @@
+
+default:libdir = libraries
+default:outdir = classes
+
+some.package.name:
+	[a]
+	[b c]
+	
+compile: [src]
+	http://some.domain.net/some/lib.jar in [b]

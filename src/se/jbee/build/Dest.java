@@ -7,8 +7,6 @@ import static se.jbee.build.Main.main;
 public final class Dest {
 
 	public static final Dest TRASH = new Dest(Type.ERASE, Folder.TRASH, Filename.NO_SPECIFIC, Main.NONE);
-	public static final Folder TARGET = folder("target");
-
 
 	/**
 	 * Possible destination expressions:
@@ -79,7 +77,7 @@ public final class Dest {
 	}
 
 	public boolean isDefault() {
-		return type == Type.YIELD && dir.equalTo(TARGET);
+		return type == Type.YIELD && dir.equalTo(Folder.OUTPUT);
 	}
 
 	@Override

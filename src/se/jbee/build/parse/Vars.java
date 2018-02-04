@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import se.jbee.build.Dest;
+import se.jbee.build.Folder;
 import se.jbee.build.WrongFormat;
 
 public final class Vars implements Var {
@@ -17,8 +17,9 @@ public final class Vars implements Var {
 				vars.put(args[i], args[++i]);
 			}
 		}
-		define("time:now", String.valueOf(System.currentTimeMillis()));
-		define("default:to", Dest.TARGET.name);
+		define(TIME_NOW, String.valueOf(System.currentTimeMillis()));
+		define(DEFAULT_OUTDIR, Folder.OUTPUT.name);
+		define(DEFAULT_LIBDIR, Folder.LIB.name);
 	}
 
 	public void define(String name, String val) {
