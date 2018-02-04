@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import se.jbee.build.Dest;
 import se.jbee.build.WrongFormat;
 
 public final class Vars implements Var {
@@ -16,11 +17,12 @@ public final class Vars implements Var {
 				vars.put(args[i], args[++i]);
 			}
 		}
-		defineVar("time:now", String.valueOf(System.currentTimeMillis()));
+		define("time:now", String.valueOf(System.currentTimeMillis()));
+		define("default:to", Dest.TARGET.name);
 	}
 
-	public void defineVar(String name, String val) {
-		if (!vars.containsKey(name))
+	public void define(String name, String val) {
+		if (!vars.containsKey(name) || name.startsWith("default:"))
 			vars.put(name, val);
 	}
 

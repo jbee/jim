@@ -25,7 +25,14 @@ public final class Build {
 		for (Goal g : goals)
 			if (g.name.equalTo(name))
 				return g;
-		throw new MissingGoal(name);
+		throw new MissingGoal(name, this);
+	}
+
+	public Label[] goals() {
+		Label[] res = new Label[goals.length];
+		for (int i = 0; i < goals.length; i++)
+			res[i] = goals[i].name;
+		return res;
 	}
 
 	@Override

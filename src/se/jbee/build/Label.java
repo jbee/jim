@@ -39,4 +39,16 @@ public final class Label implements Comparable<Label> {
 	public int compareTo(Label other) {
 		return name.compareTo(other.name);
 	}
+
+	public static String toString(Label...labels) {
+		if (labels == null || labels.length == 0)
+			return "";
+		if (labels.length == 1)
+			return labels[0].name;
+		StringBuilder b = new StringBuilder(labels.length*8);
+		b.append(labels[0].name);
+		for (int i = 1; i < labels.length; i++)
+			b.append(' ').append(labels[i].name);
+		return b.toString();
+	}
 }

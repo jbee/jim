@@ -1,5 +1,6 @@
 package se.jbee.build.parse;
 
+import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import se.jbee.build.Build;
 import se.jbee.build.Dependency;
 import se.jbee.build.Dest;
+import se.jbee.build.Folder;
 import se.jbee.build.Goal;
 import se.jbee.build.Home;
 import se.jbee.build.Label;
@@ -47,7 +49,7 @@ public final class Parser implements AutoCloseable {
 					if (colonAt > 0) {
 						int equalAt = line.indexOf(" = ");
 						if (equalAt > 0) {
-							in.vars.defineVar(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
+							in.vars.define(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
 						} else {
 							in.unreadLine();
 							int dotAt = line.indexOf('.');
@@ -168,9 +170,10 @@ public final class Parser implements AutoCloseable {
 		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSourceAt));
 		int toAt = line.indexOf(" to ");
 		int ranAt = line.indexOf(" run ");
+		Folder dir = folder(vars.resolve("default:to", vars));
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
-				: Dest.yieldTo(Dest.TARGET);
+				: Dest.yieldTo(dir);
 		Runner run = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
 		return new Goal(name, from, to, run, parseDependencies());
 	}

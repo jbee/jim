@@ -4,19 +4,22 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public final class Size {
+/**
+ * File size in bytes.
+ */
+public final class B {
 
-	public static final Size UNKNOWN = new Size(-1);
+	public static final B UNKNOWN = new B(-1);
 
-	public static Size from(URL url) {
+	public static B from(URL url) {
 		HttpURLConnection conn = null;
 		try {
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("HEAD");
 			conn.getInputStream();
-			return new Size(conn.getContentLength());
+			return new B(conn.getContentLength());
 		} catch (IOException e) {
-			return Size.UNKNOWN;
+			return B.UNKNOWN;
 		} finally {
 			if (conn != null) conn.disconnect();
 		}
@@ -24,7 +27,7 @@ public final class Size {
 
 	public final int bytes;
 
-	public Size(int bytes) {
+	public B(int bytes) {
 		super();
 		this.bytes = bytes;
 	}

@@ -7,6 +7,10 @@ import java.io.File;
  */
 public final class Home {
 
+	public static Home home() {
+		return new Home(new File("."));
+	}
+
 	public final File dir;
 
 	public Home(File dir) {

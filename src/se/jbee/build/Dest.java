@@ -39,8 +39,8 @@ public final class Dest {
 		return yieldTo(folder(dest));
 	}
 
-	public static Dest yieldTo(Folder folder) {
-		return new Dest(Type.YIELD, folder, Filename.NO_SPECIFIC, Main.NONE);
+	public static Dest yieldTo(Folder dir) {
+		return new Dest(Type.YIELD, dir, Filename.NO_SPECIFIC, Main.NONE);
 	}
 
 	public static Dest jarTo(Folder dir, Filename jar) {
@@ -57,7 +57,8 @@ public final class Dest {
 		 */
 		YIELD,
 		JAR,
-		ERASE
+		ERASE,
+		ZIP
 	}
 
 
