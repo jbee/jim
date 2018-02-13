@@ -121,17 +121,17 @@ public final class Javac {
 
 	static final class ModuleJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
-		private final Module module;
+		private final Module compiling;
 
-		protected ModuleJavaFileManager(StandardJavaFileManager fm, Module module) {
+		protected ModuleJavaFileManager(StandardJavaFileManager fm, Module compiling) {
 			super(fm);
-			this.module = module;
+			this.compiling = compiling;
 		}
 
 		@Override
 		public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse)
 				throws IOException {
-			if (!module.isAccessible(packageName))
+			if (!compiling.isAccessible(packageName))
 				return emptyList();
 			return super.list(location, packageName, kinds, recurse);
 		}

@@ -5,6 +5,8 @@ public final class Label implements Comparable<Label> {
 	public static final Label NONE = new Label("");
 
 	public static Label label(String name) {
+		if (name.isEmpty())
+			return NONE;
 		if (!name.matches("[a-zA-Z0-9][-_A-Za-z0-9]*"))
 			throw new WrongFormat("Invalid label", name);
 		return new Label(name);

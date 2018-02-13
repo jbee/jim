@@ -1,124 +1,96 @@
 package se.jbee.build.loop;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
+import static se.jbee.build.loop.Command.command;
 import static se.jbee.build.loop.Command.parseCommands;
 import static se.jbee.build.loop.Option.CONTINUE;
+import static se.jbee.build.loop.Option.HELP;
+import static se.jbee.build.loop.Option.REBUILD;
+import static se.jbee.build.loop.Option.REFETCH;
+import static se.jbee.build.loop.Option.REINSTALL;
+import static se.jbee.build.loop.Option.VERSION;
 import static se.jbee.build.loop.Option.WATCH;
-import static se.jbee.build.loop.Options.options;
 
 import org.junit.Test;
 
-import se.jbee.build.Label;
-
 public class TestCommand {
+
+	private static void assertEqual(Command[] actuals, Command...expecteds) {
+		assertArrayEquals(expecteds, actuals);
+	}
 
 	@Test
 	public void parseBareCommand() {
-		Command[] commands = parseCommands("compile");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(Options.NONE, commands[0].ops);
+		assertEqual(parseCommands("compile"), command("compile"));
 	}
 
 	@Test
 	public void parseCommandSequence() {
-		Command[] commands = parseCommands("compile", "test");
+		assertEqual(parseCommands("compile", "test"), command("compile"), command("test"));
+	}
 
-		assertEquals(2, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(Options.NONE, commands[0].ops);
-		assertEquals("test", commands[1].goal.name);
-		assertEquals(Options.NONE, commands[1].ops);
+	@Test
+	public void parseCommandSequenceWithGlobalOptions() {
+		assertEqual(parseCommands("compile", "test", "--continue"), command("compile", CONTINUE), command("test", CONTINUE));
+	}
+
+	@Test
+	public void parseCommandSequenceWithWatchOption() {
+		assertEqual(parseCommands("--watch", "compile", "test"), command("compile"), command("test", WATCH));
 	}
 
 	@Test
 	public void parseSingleCommandTailingOptions() {
-		Command[] commands = parseCommands("compile", "--continue");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(options(CONTINUE), commands[0].ops);
+		assertEqual(parseCommands("compile", "--continue"), command("compile", CONTINUE));
 	}
 
 	@Test
 	public void parseSingleCommandLeadingOptions() {
-		Command[] commands = parseCommands("--continue", "compile");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(options(CONTINUE), commands[0].ops);
+		assertEqual(parseCommands("--continue", "compile"), command("compile", CONTINUE));
 	}
 
 	@Test
 	public void parseSingleCommandLeadingAndTailingOptions() {
-		Command[] commands = parseCommands("--continue", "compile", "--watch");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(options(CONTINUE, WATCH), commands[0].ops);
+		assertEqual(parseCommands("--continue", "compile", "--watch"), command("compile", CONTINUE, WATCH));
 	}
 
 	@Test
 	public void parseCommandWithHelpOption() {
-		Command[] commands = parseCommands("compile", "--help");
-
-		assertEquals(1, commands.length);
-		assertEquals(Label.NONE, commands[0].goal);
-		assertEquals(Options.HELP, commands[0].ops);
+		assertEqual(parseCommands("compile", "--help"), command("", HELP));
 	}
 
 	@Test
 	public void parseBareHelpOption() {
-		Command[] commands = parseCommands("--help");
-
-		assertEquals(1, commands.length);
-		assertEquals(Label.NONE, commands[0].goal);
-		assertEquals(Options.HELP, commands[0].ops);
+		assertEqual(parseCommands("--help"), command("", HELP));
 	}
 
 	@Test
 	public void parseCommandWithVersionOption() {
-		Command[] commands = parseCommands("compile", "--version");
-
-		assertEquals(1, commands.length);
-		assertEquals(Label.NONE, commands[0].goal);
-		assertEquals(Options.VERSION, commands[0].ops);
+		assertEqual(parseCommands("compile", "--version"), command("", VERSION));
 	}
 
 	@Test
 	public void parseBareVersionOption() {
-		Command[] commands = parseCommands("--version");
-
-		assertEquals(1, commands.length);
-		assertEquals(Label.NONE, commands[0].goal);
-		assertEquals(Options.VERSION, commands[0].ops);
+		assertEqual(parseCommands("--version"), command("", VERSION));
 	}
 
 	@Test
 	public void parseCommandWithBang() {
-		Command[] commands = parseCommands("compile!");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(Options.REBUILD, commands[0].ops);
+		assertEqual(parseCommands("compile!"), command("compile", REBUILD));
 	}
 
 	@Test
 	public void parseCommandWithBangBang() {
-		Command[] commands = parseCommands("compile!!");
-
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(Options.REFETCH, commands[0].ops);
+		assertEqual(parseCommands("compile!!"), command("compile", REBUILD, REFETCH));
 	}
 
 	@Test
 	public void parseCommandWithBangBangBang() {
-		Command[] commands = parseCommands("compile!!!");
+		assertEqual(parseCommands("compile!!!"), command("compile", REBUILD, REFETCH, REINSTALL));
+	}
 
-		assertEquals(1, commands.length);
-		assertEquals("compile", commands[0].goal.name);
-		assertEquals(Options.REINSTALL, commands[0].ops);
+	@Test
+	public void parseCommandSequenceWithBang() {
+		assertEqual(parseCommands("compile!", "test"), command("compile", REBUILD), command("test"));
 	}
 }

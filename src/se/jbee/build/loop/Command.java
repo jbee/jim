@@ -1,6 +1,7 @@
 package se.jbee.build.loop;
 
 import static se.jbee.build.Label.label;
+import static se.jbee.build.loop.Options.options;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,10 @@ public final class Command {
 		return seq.toArray(new Command[0]);
 	}
 
+	public static Command command(String goal, Option... ops) {
+		return new Command(label(goal), options(ops));
+	}
+
 	public final Label goal;
 	public final Options ops;
 
@@ -68,6 +73,20 @@ public final class Command {
 
 	public Command with(Options set) {
 		return new Command(goal, ops.with(set));
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Command && equalTo((Command) obj);
+	}
+
+	public boolean equalTo(Command other) {
+		return goal.equalTo(other.goal) && ops.equalTo(other.ops);
+	}
+
+	@Override
+	public int hashCode() {
+		return goal.hashCode() ^ ops.hashCode();
 	}
 
 	@Override
