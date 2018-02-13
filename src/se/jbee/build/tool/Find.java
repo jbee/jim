@@ -12,17 +12,17 @@ import se.jbee.build.Main;
 
 public interface Find {
 
-	public static String qualifiedName(Home dir, Folder subdir, Main clazz) {
-		String filename = clazz.clazz+".java";
-		Path sourceFolder = subdir.toFile(dir).toPath();
+	public static String qualifiedName(Home dir, Folder src, Main cls) {
+		String filename = cls.cls+".java";
+		Path sourceFolder = src.toFile(dir).toPath();
 		try {
 			Iterator<Path> matches = Files.find(sourceFolder, 16,
 					(path, attr) -> path.getFileName().toString().equals(filename)).iterator();
 			if (!matches.hasNext())
-				throw new BuildIssue.MissingSource(clazz);
+				throw new BuildIssue.MissingSource(cls);
 			Path match = matches.next();
 			if (matches.hasNext())
-				throw new BuildIssue.AmbiguousSource(clazz, match, matches.next());
+				throw new BuildIssue.AmbiguousSource(cls, match, matches.next());
 			String file = sourceFolder.relativize(match).toString();
 			return file.substring(0, file.length()-5).replace('/', '.');
 		} catch (IOException e) {

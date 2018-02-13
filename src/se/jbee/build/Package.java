@@ -9,17 +9,21 @@ package se.jbee.build;
  */
 public final class Package implements Comparable<Package> {
 
-	public static final Package SELF = new Package(".", false);
+	/**
+	 * This is not Java's default package but the base package common to all
+	 * packages with classes within a project, like <code>se.jbee.build</code>.
+	 */
+	public static final Package ROOT = new Package(".", false);
 
 	public static Package pkg(String name) {
 		if (name.equals("."))
-			return SELF;
-		boolean plus = name.endsWith("+");
-		if (plus)
-				name = name.substring(0, name.length()-1);
+			return ROOT;
+		boolean hub = name.endsWith("+");
+		if (hub)
+			name = name.substring(0, name.length()-1);
 		if (!name.matches("[.a-zA-Z0-9_]+"))
 			throw new WrongFormat("Invalid package name", name);
-		return new Package(name, plus);
+		return new Package(name, hub);
 	}
 
 	public final String name;
@@ -27,17 +31,22 @@ public final class Package implements Comparable<Package> {
 	/**
 	 * This package is the one of a group that may depend upon others in that group.
 	 */
-	public final boolean plus;
+	public final boolean hub;
+	/**
+	 * This package represents a single level within a package hierarchy.
+	 */
+	public final boolean module;
 
-	private Package(String name, boolean plus) {
+	private Package(String name, boolean hub) {
 		this.name = name.intern();
 		this.path = name+".";
-		this.plus = plus;
+		this.hub = hub;
+		this.module = name.indexOf('.') < 0;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return name + (hub ? "+" : "");
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package se.jbee.build.parse;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static se.jbee.build.Package.pkg;
 
 import java.io.File;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import se.jbee.build.Build;
 import se.jbee.build.Structure.Module;

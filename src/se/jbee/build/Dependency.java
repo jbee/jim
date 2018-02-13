@@ -11,34 +11,40 @@ import static se.jbee.build.Url.url;
  */
 public final class Dependency {
 
-	public static Dependency parse(String dep, Folder toDefault) {
-		int inAt = dep.indexOf(" in ");
-		int toAt = dep.indexOf(" to ", max(0, inAt));
+	public static final Dependency[] NONE = new Dependency[0];
+
+	public static Dependency parse(String expr, Folder toDefault) {
+		int inAt = expr.indexOf(" in ");
+		int toAt = expr.indexOf(" to ", max(0, inAt));
 		if (inAt < 0 && toAt < 0)
-			return new Dependency(url(dep), Packages.EMPTY, toDefault);
-		Url source = url(dep.substring(0, dep.indexOf(' ')));
-		Packages ins = inAt < 0
-				? Packages.EMPTY
-				: Packages.parse(dep.substring(dep.indexOf('[', inAt) + 1, dep.indexOf(']', inAt)));
-		Folder to = toAt < 0 ? toDefault : folder(dep.substring(toAt+4).trim());
-		return new Dependency(source, ins, to);
+			return new Dependency(url(expr), Packages.NONE, toDefault);
+		Url source = url(expr.substring(0, expr.indexOf(' ')));
+		Packages in = inAt < 0
+				? Packages.NONE
+				: Packages.parse(expr.substring(expr.indexOf('[', inAt) + 1, expr.indexOf(']', inAt)));
+		Folder to = toAt < 0 ? toDefault : folder(expr.substring(toAt+4).trim());
+		return new Dependency(source, in, to);
 	}
 
-	public final Url source;
-	public final Packages ins;
+	public final Url resource;
+	public final Packages in;
 	public final Folder to;
 
-	public Dependency(Url source, Packages ins, Folder to) {
-		this.source = source;
-		this.ins = ins;
+	public Dependency(Url resource, Packages in, Folder to) {
+		this.resource = resource;
+		this.in = in;
 		this.to = to;
+	}
+
+	public boolean isLimitedToPackage() {
+		return !in.isEmpty();
 	}
 
 	@Override
 	public String toString() {
-		String res = source.url;
-		if (ins.count() > 0) {
-			res += " in "+ins;
+		String res = resource.url;
+		if (in.count() > 0) {
+			res += " in "+in;
 		}
 		if (!to.name.isEmpty()) {
 			res += " to "+to;

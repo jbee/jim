@@ -23,13 +23,33 @@ public abstract class BuildIssue extends RuntimeException {
 
 	}
 
-	public static final class IncompleteStructureDefinition extends BuildIssue {
+	/**
+	 * Used when a illegal state has been identified that only can mean the
+	 * implementation got something wrong.
+	 */
+	public static final class ImplementationFailure extends BuildIssue {
 
-		public IncompleteStructureDefinition(Module module, Package pkg) {
+		public ImplementationFailure(String message) {
+			super("OBS! What just happened? "+message);
+		}
+
+	}
+
+	public static final class IncompleteStructure extends BuildIssue {
+
+		public IncompleteStructure(Module module, Package pkg) {
 			super("Unexpected module: " + pkg
 					+ "\nMost likely a added module is missing in the module definition, known are: "
 					+ module.fanIn.union(module.fanOut));
 		}
+	}
+
+	public static final class UnknownParameter extends BuildIssue {
+
+		public UnknownParameter(Iterable<String> unknown) {
+			super("Following parameters where given but are unknown in the build: "+unknown.toString());
+		}
+
 	}
 
 	public static final class MissingGoal extends BuildIssue {
@@ -41,15 +61,16 @@ public abstract class BuildIssue extends RuntimeException {
 
 	public static final class MissingSource extends BuildIssue {
 
-		public MissingSource(Main clazz) {
-			super("Referenced source file not found: "+clazz);
+		public MissingSource(Main cls) {
+			super("Referenced source file not found: "+cls);
 		}
 	}
 
 	public static final class AmbiguousSource extends BuildIssue {
 
-		public AmbiguousSource(Main clazz, Path one, Path other) {
-			super("Referenced source is not unique: "+clazz+"\nFound: "+one+"\nand: "+other);
+		public AmbiguousSource(Main cls, Path one, Path other) {
+			super("Referenced source is not unique: "+cls+"\nFound: "+one+"\nand: "+other);
 		}
 	}
+
 }

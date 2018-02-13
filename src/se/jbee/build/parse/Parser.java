@@ -1,8 +1,10 @@
 package se.jbee.build.parse;
 
+import static java.util.Arrays.copyOfRange;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
+import static se.jbee.build.Run.runTool;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,16 +21,42 @@ import se.jbee.build.Folder;
 import se.jbee.build.Goal;
 import se.jbee.build.Home;
 import se.jbee.build.Label;
+import se.jbee.build.Main;
 import se.jbee.build.Package;
 import se.jbee.build.Packages;
-import se.jbee.build.Runner;
+import se.jbee.build.Run;
 import se.jbee.build.Sequence;
 import se.jbee.build.Src;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
+import se.jbee.build.Url;
 import se.jbee.build.WrongFormat;
 
 public final class Parser implements AutoCloseable {
+
+	public static Run parseRunner(File runner) throws FileNotFoundException, IOException, WrongFormat {
+		try (Parser in = new Parser(runner, new Vars())) {
+			return parseRunner(in);
+		}
+	}
+
+	public static Run parseRunner(Parser in) throws IOException {
+		try {
+			String line = in.readLine();
+			int colonAt = line.indexOf(':');
+			Label tool = Label.label(line.substring(0, colonAt).trim());
+			String[] mainAndArgs = line.substring(colonAt+1).trim().split("\\s+");
+			Main impl = Main.main(mainAndArgs[0]);
+			List<Url> deps = new ArrayList<>();
+			line = in.readLine();
+			while (line != null && line.startsWith("\t")) {
+				deps.add(Url.url(line.trim()));
+			}
+			return runTool(tool, copyOfRange(mainAndArgs, 1, mainAndArgs.length)).connect(impl, deps.toArray(new Url[0]));
+		} catch (WrongFormat e) {
+			throw e.at(in.lineNr, in.lastLine);
+		}
+	}
 
 	public static Build parseBuild(File build, String... args) throws FileNotFoundException, IOException, WrongFormat {
 		Home home = new Home(build.getParentFile().getParentFile());
@@ -44,25 +72,23 @@ public final class Parser implements AutoCloseable {
 		String line;
 		try {
 			while ((line = in.readLine()) != null) {
-				if (!isComment(line)) {
-					int colonAt = line.indexOf(':');
-					if (colonAt > 0) {
-						int equalAt = line.indexOf(" = ");
-						if (equalAt > 0) {
-							in.vars.define(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
-						} else {
-							in.unreadLine();
-							int dotAt = line.indexOf('.');
-							if (dotAt > 0 && dotAt < colonAt) {
-								modules = in.parseStructure();
-							} else {
-								goals.add(in.parseGoal());
-							}
-						}
+				int colonAt = line.indexOf(':');
+				if (colonAt > 0) {
+					int equalAt = line.indexOf(" = ");
+					if (equalAt > 0) {
+						in.vars.define(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
 					} else {
 						in.unreadLine();
-						sequences.add(in.parseSequence());
+						int dotAt = line.indexOf('.');
+						if (dotAt > 0 && dotAt < colonAt) {
+							modules = in.parseStructure();
+						} else {
+							goals.add(in.parseGoal());
+						}
 					}
+				} else {
+					in.unreadLine();
+					sequences.add(in.parseSequence());
 				}
 			}
 		} catch (WrongFormat e) {
@@ -72,7 +98,7 @@ public final class Parser implements AutoCloseable {
 	}
 
 	private static boolean isComment(String line) {
-		return line.startsWith("--") || line.startsWith("#") || line.matches("^\\s*$");
+		return line != null && (line.startsWith("--") || line.startsWith("#") || line.matches("^\\s*$"));
 	}
 
 
@@ -93,13 +119,18 @@ public final class Parser implements AutoCloseable {
 		this.vars = vars;
 	}
 
+	/**
+	 * Reads the next non comment line with {@link Var}s substituted.
+	 */
 	private String readLine() throws IOException {
 		if (unread) {
 			unread = false;
 			return lastLine;
 		}
-		lineNr++;
-		lastLine = in.readLine(); // update temporary so errors during var subst show the line
+		do {
+			lineNr++;
+			lastLine = in.readLine(); // update temporary so errors during var subst show the line
+		} while (isComment(lastLine));
 		lastLine = substVars(lastLine);
 		return lastLine;
 	}
@@ -135,7 +166,7 @@ public final class Parser implements AutoCloseable {
 		String line = readLine();
 		Package base = pkg(line.substring(0, line.indexOf(':')).trim());
 		line = readLine();
-		Packages above = Packages.EMPTY;
+		Packages above = Packages.NONE;
 		List<Module> modules = new ArrayList<>();
 		int level = 1;
 		while (line != null && line.startsWith("\t") && line.indexOf('[') > 0) {
@@ -145,7 +176,7 @@ public final class Parser implements AutoCloseable {
 				Packages packages = Packages.parse(set);
 				Packages plusList = aboveLevel.union(packages);
 				for (Package p : packages)
-					modules.add(new Module(base, p, level, p.plus ? plusList : above));
+					modules.add(new Module(base, p, level, p.hub ? plusList : above));
 				above = above.union(packages);
 			}
 			level++;
@@ -174,7 +205,7 @@ public final class Parser implements AutoCloseable {
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(dir);
-		Runner run = ranAt < 0 ? Runner.NONE : Runner.parse(line.substring(ranAt+5).trim());
+		Run run = ranAt < 0 ? Run.NONE : Run.parse(line.substring(ranAt+5).trim());
 		return new Goal(name, from, to, run, parseDependencies());
 	}
 
@@ -185,12 +216,12 @@ public final class Parser implements AutoCloseable {
 		Folder to = folder(vars.resolve(Var.DEFAULT_LIBDIR, vars));
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
 			Dependency dep = Dependency.parse(line.trim(), to);
-			if (dep.source.virtual) {
+			if (dep.resource.virtual) {
 				group = dep;
 			} else {
 				if (line.startsWith("\t\t") && group != null) {
-					dep = new Dependency(dep.source,
-						dep.ins == Packages.EMPTY ? group.ins : dep.ins,
+					dep = new Dependency(dep.resource,
+						dep.in == Packages.NONE ? group.in : dep.in,
 						dep.to == to ? group.to : dep.to);
 				} else {
 					group = null;
@@ -213,4 +244,5 @@ public final class Parser implements AutoCloseable {
 			seq[i-1] =  new Goal(label(segs[i])); // these are shallow for now and are replace later
 		return new Sequence(label(segs[0]), seq);
 	}
+
 }

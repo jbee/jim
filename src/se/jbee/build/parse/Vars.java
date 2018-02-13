@@ -2,7 +2,9 @@ package se.jbee.build.parse;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import se.jbee.build.Folder;
 import se.jbee.build.WrongFormat;
@@ -10,16 +12,32 @@ import se.jbee.build.WrongFormat;
 public final class Vars implements Var {
 
 	private final Map<String, String> vars = new HashMap<>();
+	private final Set<String> unexpectedArgs = new HashSet<>();
 
 	public Vars(String... args) {
 		for (int i = 0; i < args.length; i++) {
-			if (args[i].matches("-[a-zA-Z0-9]")) {
-				vars.put(args[i], args[++i]);
+			String key = args[i];
+			if (key.length() >= 2 && key.charAt(0) == '-' && Character.isLetterOrDigit(key.charAt(1))) {
+				if (key.length() > 2) {
+					defineArg(key.substring(0, 2), key.substring(2));
+
+				} else {
+					defineArg(key, args[++i]);
+				}
 			}
 		}
 		define(TIME_NOW, String.valueOf(System.currentTimeMillis()));
 		define(DEFAULT_OUTDIR, Folder.OUTPUT.name);
 		define(DEFAULT_LIBDIR, Folder.LIB.name);
+	}
+
+	private void defineArg(String name, String val) {
+		unexpectedArgs.add(name);
+		vars.put(name, val);
+	}
+
+	public Iterable<String> unexpectedArgs() {
+		return unexpectedArgs;
 	}
 
 	public void define(String name, String val) {
@@ -33,6 +51,7 @@ public final class Vars implements Var {
 		for (String var : chain) {
 			if (var.startsWith("-")) {
 				String res = vars.get(var);
+				unexpectedArgs.remove(var);
 				if (res != null)
 					return res;
 			} else if (var.indexOf(':') >= 0) {

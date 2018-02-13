@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 public final class Packages implements Iterable<Package> {
 
-	public static final Packages EMPTY = new Packages(new Package[0]);
+	public static final Packages NONE = new Packages(new Package[0]);
 
 	public static Packages parse(String packages) {
 		String[] members = packages.trim().replaceAll("[\\[\\]]+", "").split("[ ,]\\s*");
@@ -60,6 +60,10 @@ public final class Packages implements Iterable<Package> {
 		return set.length;
 	}
 
+	public boolean isEmpty() {
+		return set.length == 0;
+	}
+
 	public Packages union(Packages others) {
 		if (others.set.length == 0)
 			return this;
@@ -86,4 +90,5 @@ public final class Packages implements Iterable<Package> {
 				res[i++] = p;
 		return i == set.length ? this : new Packages(copyOf(res, i));
 	}
+
 }

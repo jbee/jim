@@ -25,10 +25,10 @@ import se.jbee.build.Dependency;
 import se.jbee.build.Home;
 import se.jbee.build.B;
 
-public final class Remote {
+public final class Fetch {
 
 	public static void fetch(Home home, Dependency dep, boolean replaceExisting) {
-		File target = new File(dep.to.toFile(home), dep.source.filename());
+		File target = new File(dep.to.toFile(home), dep.resource.filename());
 		if (target.exists() && !replaceExisting)
 			return;
 		try {
@@ -36,7 +36,7 @@ public final class Remote {
 			dir.mkdirs();
 			Thread watcher = new Thread(watch(dir));
 			watcher.start();
-			URL artefact = new URL(dep.source.url);
+			URL artefact = new URL(dep.resource.url);
 			System.out.println("Downloading "+artefact+" to "+target);
 			System.out.println(B.from(artefact));
 			fetch(artefact, target);
@@ -49,11 +49,11 @@ public final class Remote {
 
 	private static void checkSHA1(Dependency dep, File data)
 			throws MalformedURLException, IOException, FileNotFoundException {
-		File target = new File(data.getParentFile(), dep.source.filename()+".sha1");
+		File target = new File(data.getParentFile(), dep.resource.filename()+".sha1");
 		if (target.exists())
 			return;
 		System.out.println("Warning: The .sha1 of the remote dependencies should be checked into source control.");
-		URL src = new URL(dep.source.url+".sha1");
+		URL src = new URL(dep.resource.url+".sha1");
 		B sha1 = B.from(src);
 		if (!sha1.isUnknown()) {
 			fetch(src, target);

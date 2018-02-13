@@ -5,19 +5,19 @@ public final class Goal {
 	public final Label name;
 	public final Src[] from;
 	public final Dest to;
-	public final Runner run;
-	public final Dependency[] dependencies;
+	public final Run tool;
+	public final Dependency[] deps;
 
 	public Goal(Label name) {
-		this(name, new Src[0], null, null, new Dependency[0]);
+		this(name, new Src[0], null, null, Dependency.NONE);
 	}
 
-	public Goal(Label name, Src[] from, Dest to, Runner run, Dependency[] dependencies) {
+	public Goal(Label name, Src[] from, Dest to, Run tool, Dependency[] deps) {
 		this.name = name;
 		this.from = from;
 		this.to = to;
-		this.run = run;
-		this.dependencies = dependencies;
+		this.tool = tool;
+		this.deps = deps;
 	}
 
 	@Override
@@ -31,10 +31,10 @@ public final class Goal {
 		if (!to.isDefault()) {
 			b.append(" to ").append(to);
 		}
-		if (run != Runner.NONE) {
-			b.append(" run ").append(run);
+		if (tool != Run.NONE) {
+			b.append(" run ").append(tool);
 		}
-		for (Dependency d : dependencies)
+		for (Dependency d : deps)
 			b.append("\n\t").append(d);
 		return b.toString();
 	}

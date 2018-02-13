@@ -85,8 +85,8 @@ public final class Dest {
 		String res = dir.name;
 		if (!artefact.name.isEmpty())
 			res += "/"+artefact.name;
-		if (!launcher.clazz.isEmpty())
-			res += ":"+launcher.clazz;
+		if (!launcher.cls.isEmpty())
+			res += ":"+launcher.cls;
 		return res;
 	}
 }

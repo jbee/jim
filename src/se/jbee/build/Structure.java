@@ -3,7 +3,7 @@ package se.jbee.build;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import se.jbee.build.BuildIssue.IncompleteStructureDefinition;
+import se.jbee.build.BuildIssue.IncompleteStructure;
 
 /**
  * The inter-module dependencies.
@@ -21,33 +21,33 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 	/**
 	 * From independent at index 0 to most dependent at last index.
 	 */
-	private final Module[] layers;
+	private final Module[] levels;
 
-	public Structure(Module[] layers) {
-		this.layers = layers;
+	public Structure(Module[] levels) {
+		this.levels = levels;
 	}
 
 	@Override
 	public Iterator<Module> iterator() {
-		return Arrays.asList(layers).iterator();
+		return Arrays.asList(levels).iterator();
 	}
 
 	public Module of(Package pkg) {
-		for (Module m : layers)
+		for (Module m : levels)
 			if (m.module.equalTo(pkg))
 				return m;
-		throw new IncompleteStructureDefinition(layers[layers.length-1], pkg);
+		throw new IncompleteStructure(levels[levels.length-1], pkg);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append(layers[0].base).append(":\n");
-		if (layers.length > 0) {
-			b.append("\t[").append(layers[0].module);
-			for (int i = 1; i < layers.length; i++) {
-				Module m0 = layers[i-1];
-				Module m1 = layers[i];
+		b.append(levels[0].base).append(":\n");
+		if (levels.length > 0) {
+			b.append("\t[").append(levels[0].module);
+			for (int i = 1; i < levels.length; i++) {
+				Module m0 = levels[i-1];
+				Module m1 = levels[i];
 				if (m1.level == m0.level) {
 					if (m0.isAccessible(m1.module)) {
 						b.append(' ');
@@ -86,7 +86,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 		public final Packages fanOut;
 
 		public Module(Package base, Package module, int level, Packages fanIn) {
-			this(base, module, level, fanIn, Packages.EMPTY);
+			this(base, module, level, fanIn, Packages.NONE);
 		}
 
 		private Module(Package base, Package module, int level, Packages fanIn, Packages fanOut) {
@@ -107,12 +107,12 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 				return true;
 			if (fanOut.contains(sibling))
 				return false;
-			throw new BuildIssue.IncompleteStructureDefinition(this, sibling);
+			throw new BuildIssue.IncompleteStructure(this, sibling);
 		}
 
 		public boolean isAccessible(String packageName) {
 			if (packageName.equals(base.name))
-				return isAccessible(Package.SELF);
+				return isAccessible(Package.ROOT);
 			if (!packageName.startsWith(base.path) || hasModule(module.name, base.name.length(), packageName))
 				return true; // this module or one of its sub-packages
 			int dotAt = packageName.indexOf('.', base.name.length());

@@ -1,8 +1,10 @@
 package se.jbee.build;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.regex.Pattern;
 
-public final class Filter implements Comparable<Filter> {
+public final class Filter implements Comparable<Filter>, FilenameFilter {
 
 	public static final Filter UNFILTERED = new Filter("*");
 
@@ -27,12 +29,17 @@ public final class Filter implements Comparable<Filter> {
 		this.regex = Pattern.compile(pattern.replace(".", "\\.").replace("*", ".*"));
 	}
 
+	@Override
+	public boolean accept(File dir, String name) {
+		return matches(name);
+	}
+
 	public boolean isFiltered() {
 		return this != UNFILTERED;
 	}
 
-	public boolean matches(String s) {
-		return regex.matcher(s).matches();
+	public boolean matches(String name) {
+		return !isFiltered() || regex.matcher(name).matches();
 	}
 
 	@Override
