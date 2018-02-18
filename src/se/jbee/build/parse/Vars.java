@@ -11,8 +11,12 @@ import se.jbee.build.WrongFormat;
 
 public final class Vars implements Var {
 
+	/**
+	 * The set of explicitly command line arguments of type {@code -X} that are not
+	 * used in the build file.
+	 */
+	private final Set<String> unusedArgs = new HashSet<>();
 	private final Map<String, String> vars = new HashMap<>();
-	private final Set<String> unexpectedArgs = new HashSet<>();
 
 	public Vars(String... args) {
 		for (int i = 0; i < args.length; i++) {
@@ -20,7 +24,6 @@ public final class Vars implements Var {
 			if (key.length() >= 2 && key.charAt(0) == '-' && Character.isLetterOrDigit(key.charAt(1))) {
 				if (key.length() > 2) {
 					defineArg(key.substring(0, 2), key.substring(2));
-
 				} else {
 					defineArg(key, args[++i]);
 				}
@@ -32,12 +35,12 @@ public final class Vars implements Var {
 	}
 
 	private void defineArg(String name, String val) {
-		unexpectedArgs.add(name);
+		unusedArgs.add(name);
 		vars.put(name, val);
 	}
 
-	public Iterable<String> unexpectedArgs() {
-		return unexpectedArgs;
+	public Iterable<String> unusedArgs() {
+		return unusedArgs;
 	}
 
 	public void define(String name, String val) {
@@ -51,7 +54,7 @@ public final class Vars implements Var {
 		for (String var : chain) {
 			if (var.startsWith("-")) {
 				String res = vars.get(var);
-				unexpectedArgs.remove(var);
+				unusedArgs.remove(var);
 				if (res != null)
 					return res;
 			} else if (var.indexOf(':') >= 0) {

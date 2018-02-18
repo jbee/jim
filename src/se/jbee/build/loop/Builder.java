@@ -1,10 +1,6 @@
 package se.jbee.build.loop;
 
 import se.jbee.build.Build;
-import se.jbee.build.Dependency;
-import se.jbee.build.Goal;
-import se.jbee.build.Label;
-import se.jbee.build.tool.Fetch;
 
 public class Builder {
 
@@ -14,16 +10,22 @@ public class Builder {
 
 	//TODO as interface for the obj send everywhere to e.g. append to the output
 
-	public static void run(Command... commands) {
+	//TODO build state: a list of URL/Dependencies loaded...
+	//src->dest combinations already done
 
+	private final Build build;
+
+	private Builder(Build build) {
+		this.build = build;
 	}
 
-
-	public static void run(Build build, Label goal) {
-		Goal g = build.goal(goal);
-		for (Dependency d : g.deps)
-			Fetch.fetch(build.home, d, true);
+	public static void run(Build build, Command... commands) {
+		Builder b = new Builder(build);
+		for (Command cmd : commands)
+			b.run(cmd);
 	}
 
+	private void run(Command cmd) {
 
+	}
 }

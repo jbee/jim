@@ -14,7 +14,8 @@ public final class Folder implements Comparable<Folder>, Location {
 		TRASH = new Folder("?"),
 		HOME = new Folder("."),
 		LIB = folder("lib"),
-		OUTPUT = folder("target");
+		OUTPUT = folder("target"),
+		RUN = folder(".jim/run");
 
 	/**
 	 * <pre>
@@ -32,7 +33,7 @@ public final class Folder implements Comparable<Folder>, Location {
 			folder = folder.substring(0, folder.length()-1);
 		if (".".equals(folder) || folder.isEmpty())
 			return HOME;
-		if (!folder.matches("[a-zA-Z0-9][-.+a-zA-Z0-9_/]+"))
+		if (!folder.matches("\\.?[a-zA-Z0-9][-.+a-zA-Z0-9_/]+"))
 			throw new WrongFormat("Invalid folder", folder);
 		return new Folder(folder);
 	}

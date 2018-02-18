@@ -11,8 +11,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.jbee.build.Build;
 import se.jbee.build.Dependency;
@@ -34,9 +37,11 @@ import se.jbee.build.WrongFormat;
 
 public final class Parser implements AutoCloseable {
 
-	public static Run parseRunner(File runner) throws FileNotFoundException, IOException, WrongFormat {
-		try (Parser in = new Parser(runner, new Vars())) {
+	public static Run parseRunner(File runner, Vars vars) throws UncheckedIOException, WrongFormat {
+		try (Parser in = new Parser(runner, vars)) {
 			return parseRunner(in);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -58,10 +63,11 @@ public final class Parser implements AutoCloseable {
 		}
 	}
 
-	public static Build parseBuild(File build, String... args) throws FileNotFoundException, IOException, WrongFormat {
-		Home home = new Home(build.getParentFile().getParentFile());
+	public static Build parseBuild(File build, String... args) throws UncheckedIOException, WrongFormat {
 		try (Parser in = new Parser(build, new Vars(args))) {
-			return parseBuild(home, in);
+			return parseBuild(new Home(build.getParentFile().getParentFile()), in);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -69,6 +75,7 @@ public final class Parser implements AutoCloseable {
 		Structure modules = null;
 		List<Goal> goals = new ArrayList<>();
 		List<Sequence> sequences = new ArrayList<>();
+		Map<Label, Run> runners = new HashMap<>();
 		String line;
 		try {
 			while ((line = in.readLine()) != null) {
@@ -83,7 +90,15 @@ public final class Parser implements AutoCloseable {
 						if (dotAt > 0 && dotAt < colonAt) {
 							modules = in.parseStructure();
 						} else {
-							goals.add(in.parseGoal());
+							Goal goal = in.parseGoal();
+							if (!goal.run.isNone()) {
+								if (!runners.containsKey(goal.run.tool)) {
+									//TODO error handling
+									runners.put(goal.run.tool, parseRunner(new File(new File(home.dir, Folder.RUN.name), goal.run.tool.name), in.vars));
+								}
+								goal = goal.init(runners.get(goal.run.tool));
+							}
+							goals.add(goal);
 						}
 					}
 				} else {

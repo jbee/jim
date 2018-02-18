@@ -15,6 +15,10 @@ public abstract class BuildIssue extends RuntimeException {
 		super(cause);
 	}
 
+	public static ImplementationFailure failure(String msg) {
+		return new ImplementationFailure(msg);
+	}
+
 	public static final class Misconfiguration extends BuildIssue {
 
 		public Misconfiguration(IOException cause) {
@@ -29,7 +33,7 @@ public abstract class BuildIssue extends RuntimeException {
 	 */
 	public static final class ImplementationFailure extends BuildIssue {
 
-		public ImplementationFailure(String message) {
+		private ImplementationFailure(String message) {
 			super("OBS! What just happened? "+message);
 		}
 
