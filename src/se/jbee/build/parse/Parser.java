@@ -75,7 +75,6 @@ public final class Parser implements AutoCloseable {
 		Structure modules = null;
 		List<Goal> goals = new ArrayList<>();
 		List<Sequence> sequences = new ArrayList<>();
-		Map<Label, Run> runners = new HashMap<>();
 		String line;
 		try {
 			while ((line = in.readLine()) != null) {
@@ -90,15 +89,7 @@ public final class Parser implements AutoCloseable {
 						if (dotAt > 0 && dotAt < colonAt) {
 							modules = in.parseStructure();
 						} else {
-							Goal goal = in.parseGoal();
-							if (!goal.run.isNone()) {
-								if (!runners.containsKey(goal.run.tool)) {
-									//TODO error handling
-									runners.put(goal.run.tool, parseRunner(new File(new File(home.dir, Folder.RUN.name), goal.run.tool.name), in.vars));
-								}
-								goal = goal.init(runners.get(goal.run.tool));
-							}
-							goals.add(goal);
+							goals.add(in.parseGoal(home));
 						}
 					}
 				} else {
@@ -119,6 +110,7 @@ public final class Parser implements AutoCloseable {
 
 	private final BufferedReader in;
 	private final Vars vars;
+	private final Map<Label, Run> runners = new HashMap<>();
 
 	private int lineNr;
 	private String lastLine = "";
@@ -206,7 +198,7 @@ public final class Parser implements AutoCloseable {
 		return new Structure(layers);
 	}
 
-	private Goal parseGoal() throws IOException {
+	private Goal parseGoal(Home home) throws IOException {
 		String line = readLine();
 		int colonAt = line.indexOf(':');
 		if (colonAt < 0)
@@ -221,7 +213,26 @@ public final class Parser implements AutoCloseable {
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(dir);
 		Run run = ranAt < 0 ? Run.NONE : Run.parse(line.substring(ranAt+5).trim());
-		return new Goal(name, from, to, run, parseDependencies());
+		return new Goal(name, from, to, parseRunnerFor(run, home), parseDependencies());
+	}
+
+	private Run parseRunnerFor(Run run, Home home) {
+		if (run.isNone())
+			return run;
+		final Label tool = run.tool;
+		if (!runners.containsKey(tool)) {
+			try {
+				runners.put(tool, parseRunner(new File(new File(home.dir, Folder.RUN.name), tool.name), vars));
+			} catch (UncheckedIOException e) {
+				if (e.getCause() instanceof FileNotFoundException) {
+					throw new WrongFormat("File for referenced runner is missing.", tool.name);
+				}
+				throw new WrongFormat("Error reading reference runner file: "+e.toString(), tool.name);
+			} catch (WrongFormat e) {
+				throw new WrongFormat("File for reference runner has a syntax error: "+e.toString(), tool.name);
+			}
+		}
+		return run.use(runners.get(tool));
 	}
 
 	private Dependency[] parseDependencies() throws IOException {

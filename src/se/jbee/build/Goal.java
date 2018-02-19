@@ -20,10 +20,6 @@ public final class Goal {
 		this.deps = deps;
 	}
 
-	public Goal init(Run tool) {
-		return this.run.isNone() ? this : new Goal(name, from, to, this.run.use(tool), deps);
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
