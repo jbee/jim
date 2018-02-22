@@ -4,7 +4,7 @@ import static java.util.Arrays.copyOfRange;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
-import static se.jbee.build.Run.runTool;
+import static se.jbee.build.Run.run;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,21 +46,33 @@ public final class Parser implements AutoCloseable {
 	}
 
 	public static Run parseRunner(Parser in) throws IOException {
+		String line;
 		try {
-			String line = in.readLine();
-			int colonAt = line.indexOf(':');
-			Label tool = Label.label(line.substring(0, colonAt).trim());
-			String[] mainAndArgs = line.substring(colonAt+1).trim().split("\\s+");
-			Main impl = Main.main(mainAndArgs[0]);
-			List<Url> deps = new ArrayList<>();
-			line = in.readLine();
-			while (line != null && line.startsWith("\t")) {
-				deps.add(Url.url(line.trim()));
+			while ((line = in.readLine()) != null) {
+				int equalAt = line.indexOf("=");
+				if (equalAt > 0) {
+					defineVar(in, line);
+				} else {
+					int colonAt = line.indexOf(':');
+					Label tool = Label.label(line.substring(0, colonAt).trim());
+					String[] mainAndArgs = line.substring(colonAt+1).trim().split("\\s+");
+					Main impl = Main.main(mainAndArgs[0]);
+					List<Url> deps = new ArrayList<>();
+					while ((line = in.readLine()) != null && line.startsWith("\t")) {
+						deps.add(Url.url(line.trim()));
+					}
+					return run(tool, copyOfRange(mainAndArgs, 1, mainAndArgs.length)).connect(impl, deps.toArray(new Url[0]));
+				}
 			}
-			return runTool(tool, copyOfRange(mainAndArgs, 1, mainAndArgs.length)).connect(impl, deps.toArray(new Url[0]));
+			throw new WrongFormat("Runner declaration missing.", "");
 		} catch (WrongFormat e) {
 			throw e.at(in.lineNr, in.lastLine);
 		}
+	}
+
+	private static void defineVar(Parser in, String line) {
+		int equalAt = line.indexOf("=");
+		in.vars.define(line.substring(0, equalAt).trim(), line.substring(equalAt+1).trim());
 	}
 
 	public static Build parseBuild(File build, String... args) throws UncheckedIOException, WrongFormat {
@@ -80,9 +92,9 @@ public final class Parser implements AutoCloseable {
 			while ((line = in.readLine()) != null) {
 				int colonAt = line.indexOf(':');
 				if (colonAt > 0) {
-					int equalAt = line.indexOf(" = ");
+					int equalAt = line.indexOf("=");
 					if (equalAt > 0) {
-						in.vars.define(line.substring(0, equalAt).trim(), line.substring(equalAt+3).trim());
+						defineVar(in, line);
 					} else {
 						in.unreadLine();
 						int dotAt = line.indexOf('.');
@@ -212,12 +224,12 @@ public final class Parser implements AutoCloseable {
 		Dest to = toAt > 0
 				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: Dest.yieldTo(dir);
-		Run run = ranAt < 0 ? Run.NONE : Run.parse(line.substring(ranAt+5).trim());
+		Run run = ranAt < 0 ? Run.NOTHING : Run.parse(line.substring(ranAt+5).trim());
 		return new Goal(name, from, to, parseRunnerFor(run, home), parseDependencies());
 	}
 
 	private Run parseRunnerFor(Run run, Home home) {
-		if (run.isNone())
+		if (run.isNothing())
 			return run;
 		final Label tool = run.tool;
 		if (!runners.containsKey(tool)) {

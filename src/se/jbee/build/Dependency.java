@@ -13,6 +13,13 @@ public final class Dependency {
 
 	public static final Dependency[] NONE = new Dependency[0];
 
+	public static Dependency[] dependencies(Url... dependencies) {
+		Dependency[] deps = dependencies.length == 0 ? NONE : new Dependency[dependencies.length];
+		for (int i = 0; i < deps.length; i++)
+			deps[i] = new Dependency(dependencies[i], Packages.NONE, Run.to);
+		return deps;
+	}
+
 	public static Dependency parse(String expr, Folder toDefault) {
 		int inAt = expr.indexOf(" in ");
 		int toAt = expr.indexOf(" to ", max(0, inAt));
@@ -51,4 +58,5 @@ public final class Dependency {
 		}
 		return res;
 	}
+
 }

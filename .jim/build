@@ -1,6 +1,8 @@
 --
 -- JIM's own build file
 --
+repo:maven = http://central.maven.org/maven2
+v:junit    = 4.12
 
 se.jbee.build:
 	[.]
@@ -9,6 +11,6 @@ se.jbee.build:
 	
 compile: [src]
 
-test: [test:Test*.java] run junit
+test: [test:Test*.java] run junit4
 
 jar: [src] to jim-{git-tag}.jar

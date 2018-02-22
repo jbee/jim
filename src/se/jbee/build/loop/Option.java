@@ -2,6 +2,10 @@ package se.jbee.build.loop;
 
 public enum Option {
 
+	/*
+	 * Special tasks (non build executions)
+	 */
+
 	/**
 	 * <code>--help</code> prints the help screen and exits.
 	 */
@@ -11,6 +15,15 @@ public enum Option {
 	 * <code>--version</code> prints the version screen and exits.
 	 */
 	VERSION,
+
+	/**
+	 * <code>--init</code> creates checksum files for dependencies without them and exits.
+	 */
+	INIT,
+
+	/*
+	 * Global options:
+	 */
 
 	/**
 	 * <code>--watch</code> adds file watch and recompiles/copies on changes.
@@ -27,6 +40,10 @@ public enum Option {
 	 * <code>--quiet</code> out is reduced to a bare minimum, it might even be nothing
 	 */
 	QUIET,
+
+	/*
+	 * Per command options:
+	 */
 
 	/**
 	 * <code>!</code> after the goal (like <code>compile!</code>) causes the builder

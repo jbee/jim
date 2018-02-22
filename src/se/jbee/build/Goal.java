@@ -9,7 +9,7 @@ public final class Goal {
 	public final Dependency[] deps;
 
 	public Goal(Label name) {
-		this(name, new Src[0], null, Run.NONE, Dependency.NONE);
+		this(name, new Src[0], null, Run.NOTHING, Dependency.NONE);
 	}
 
 	public Goal(Label name, Src[] from, Dest to, Run tool, Dependency[] deps) {
@@ -31,7 +31,7 @@ public final class Goal {
 		if (!to.isDefault()) {
 			b.append(" to ").append(to);
 		}
-		if (!run.isNone()) {
+		if (!run.isNothing()) {
 			b.append(" run ").append(run);
 		}
 		for (Dependency d : deps)

@@ -76,7 +76,7 @@ public final class Dest {
 			return new java.io.File(new java.io.File(dir.name), artefact.name);
 	}
 
-	public boolean isDefault() {
+	public boolean isDefault() { //FIXME folder is changeable via Var - bad for deciding default or not
 		return type == Type.YIELD && dir.equalTo(Folder.OUTPUT);
 	}
 
