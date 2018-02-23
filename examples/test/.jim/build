@@ -8,3 +8,5 @@ some.package.name:
 	
 compile: [src]
 	http://some.domain.net/some/lib.jar in [b]
+	
+foo: []

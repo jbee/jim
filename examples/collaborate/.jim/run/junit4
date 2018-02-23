@@ -1,0 +1,4 @@
+# see https://github.com/junit-team/junit4/wiki/test-runners
+
+junit4:se.jbee.build.run.junit.JUnit4Runner
+	{repo:maven}/junit/junit/{v:junit}/junit-{v:junit}.jar	

@@ -20,7 +20,7 @@ public final class Dependency {
 		return deps;
 	}
 
-	public static Dependency parse(String expr, Folder toDefault) {
+	public static Dependency parseDependency(String expr, Folder toDefault) {
 		int inAt = expr.indexOf(" in ");
 		int toAt = expr.indexOf(" to ", max(0, inAt));
 		if (inAt < 0 && toAt < 0)

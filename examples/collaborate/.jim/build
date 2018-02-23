@@ -19,8 +19,6 @@ compile: [src]
 	{repo:maven}/org/eclipse/jetty/aggregate/jetty-all/{v:jetty}/jetty-all-{v:jetty}-uber.jar in [http]
 
 junit: [test:Test*.java] run junit4
-	* to xlib
-		{repo:maven}/junit/junit/{v:junit}/junit-{v:junit}.jar	
 
 clean: [*] to ?
 

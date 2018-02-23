@@ -3,17 +3,17 @@ package se.jbee.build;
 import static se.jbee.build.Filter.filter;
 import static se.jbee.build.Folder.folder;
 
-public final class Src {
+public final class From {
 
-	public static Src[] split(String sources) {
+	public static From[] parseSources(String sources) {
 		String[] sn = sources.split("[ ,]\\s*");
-		Src[] res = new Src[sn.length];
+		From[] res = new From[sn.length];
 		for (int i = 0; i < sn.length; i++)
-			res[i] = Src.parse(sn[i]);
+			res[i] = From.parseSource(sn[i]);
 		return res;
 	}
 
-	public static Src parse(String source) {
+	public static From parseSource(String source) {
 		boolean depsInJar = source.endsWith("++");
 		if (depsInJar)
 			source = source.substring(0, source.length()-2);
@@ -22,8 +22,8 @@ public final class Src {
 			source = source.substring(0, source.length()-1);
 		int colon = source.indexOf(':');
 		return colon > 0
-				? new Src(folder(source.substring(0, colon)), filter(source.substring(colon + 1)), depsOnCP, depsInJar)
-				: new Src(folder(source), depsOnCP, depsInJar);
+				? new From(folder(source.substring(0, colon)), filter(source.substring(colon + 1)), depsOnCP, depsInJar)
+				: new From(folder(source), depsOnCP, depsInJar);
 	}
 
 	public final Folder dir;
@@ -39,11 +39,11 @@ public final class Src {
 	 */
 	public final boolean depsInJar;
 
-	public Src(Folder dir, boolean depsOnCP, boolean depsInJar) {
+	public From(Folder dir, boolean depsOnCP, boolean depsInJar) {
 		this(dir, Filter.UNFILTERED, depsOnCP, depsInJar);
 	}
 
-	public Src(Folder dir, Filter filter, boolean depsOnCP, boolean depsInJar) {
+	public From(Folder dir, Filter filter, boolean depsOnCP, boolean depsInJar) {
 		this.dir = dir;
 		this.pattern = filter;
 		this.depsOnCP = depsOnCP;
@@ -55,15 +55,15 @@ public final class Src {
 		return dir+(pattern.isFiltered()? ":"+pattern.toString() : "")+(depsOnCP ? "+" : "");
 	}
 
-	public boolean isSuperset(Src other) {
+	public boolean isSuperset(From other) {
 		return isSuperset(this, other);
 	}
 
-	public boolean isSubset(Src other) {
+	public boolean isSubset(From other) {
 		return isSuperset(other, this);
 	}
 
-	public static boolean isSuperset(Src a, Src b) {
+	public static boolean isSuperset(From a, From b) {
 		return b.dir.equalTo(a.dir)
 				&& (b.pattern.equalTo(a.pattern) || !b.pattern.isFiltered() && a.pattern.isFiltered());
 	}

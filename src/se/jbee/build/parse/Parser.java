@@ -19,7 +19,7 @@ import java.util.Map;
 
 import se.jbee.build.Build;
 import se.jbee.build.Dependency;
-import se.jbee.build.Dest;
+import se.jbee.build.To;
 import se.jbee.build.Folder;
 import se.jbee.build.Goal;
 import se.jbee.build.Home;
@@ -29,7 +29,7 @@ import se.jbee.build.Package;
 import se.jbee.build.Packages;
 import se.jbee.build.Run;
 import se.jbee.build.Sequence;
-import se.jbee.build.Src;
+import se.jbee.build.From;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.Url;
@@ -217,13 +217,13 @@ public final class Parser implements AutoCloseable {
 			fail("Expected a goal but found", line);
 		Label name = label(line.substring(0, colonAt).trim());
 		int endOfSourceAt = line.indexOf(']');
-		Src[] from = Src.split(line.substring(line.indexOf('[')+1, endOfSourceAt));
+		From[] from = From.parseSources(line.substring(line.indexOf('[')+1, endOfSourceAt));
 		int toAt = line.indexOf(" to ");
 		int ranAt = line.indexOf(" run ");
 		Folder dir = folder(vars.resolve(Var.DEFAULT_OUTDIR, vars));
-		Dest to = toAt > 0
-				? Dest.parse(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
-				: Dest.yieldTo(dir);
+		To to = toAt > 0
+				? To.parseDest(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
+				: To.yieldTo(dir);
 		Run run = ranAt < 0 ? Run.NOTHING : Run.parse(line.substring(ranAt+5).trim());
 		return new Goal(name, from, to, parseRunnerFor(run, home), parseDependencies());
 	}
@@ -253,7 +253,7 @@ public final class Parser implements AutoCloseable {
 		Dependency group = null;
 		Folder to = folder(vars.resolve(Var.DEFAULT_LIBDIR, vars));
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
-			Dependency dep = Dependency.parse(line.trim(), to);
+			Dependency dep = Dependency.parseDependency(line.trim(), to);
 			if (dep.resource.virtual) {
 				group = dep;
 			} else {

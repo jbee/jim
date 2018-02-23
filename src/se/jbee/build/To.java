@@ -4,9 +4,9 @@ import static java.lang.Math.max;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Main.main;
 
-public final class Dest {
+public final class To {
 
-	public static final Dest TRASH = new Dest(Type.ERASE, Folder.TRASH, Filename.NO_SPECIFIC, Main.NONE);
+	public static final To TRASH = new To(Type.ERASE, Folder.TRASH, Filename.NO_SPECIFIC, Main.NONE);
 
 	/**
 	 * Possible destination expressions:
@@ -18,7 +18,7 @@ public final class Dest {
 	 * some/folder/some.jar:MainClass
 	 * </pre>
 	 */
-	public static Dest parse(String dest) {
+	public static To parseDest(String dest) {
 		if (dest.isEmpty() || "?".equals(dest))
 			return TRASH;
 		if (dest.contains(".jar:")) {
@@ -37,16 +37,16 @@ public final class Dest {
 		return yieldTo(folder(dest));
 	}
 
-	public static Dest yieldTo(Folder dir) {
-		return new Dest(Type.YIELD, dir, Filename.NO_SPECIFIC, Main.NONE);
+	public static To yieldTo(Folder dir) {
+		return new To(Type.YIELD, dir, Filename.NO_SPECIFIC, Main.NONE);
 	}
 
-	public static Dest jarTo(Folder dir, Filename jar) {
+	public static To jarTo(Folder dir, Filename jar) {
 		return jarTo(dir, jar, Main.NONE);
 	}
 
-	public static Dest jarTo(Folder dir, Filename jar, Main clazz) {
-		return new Dest(Type.JAR, dir, jar, clazz);
+	public static To jarTo(Folder dir, Filename jar, Main clazz) {
+		return new To(Type.JAR, dir, jar, clazz);
 	}
 
 	public static enum Type {
@@ -65,7 +65,7 @@ public final class Dest {
 	public final Filename artefact;
 	public final Main launcher;
 
-	private Dest(Type type, Folder dir, Filename artefact, Main launcher) {
+	private To(Type type, Folder dir, Filename artefact, Main launcher) {
 		this.type = type;
 		this.dir = dir;
 		this.artefact = artefact;
