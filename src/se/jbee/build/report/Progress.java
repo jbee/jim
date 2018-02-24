@@ -1,6 +1,6 @@
 package se.jbee.build.report;
 
-public interface Flow {
+public interface Progress {
 
 	void next(String tool);
 

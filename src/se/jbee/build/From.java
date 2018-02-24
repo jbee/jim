@@ -3,7 +3,7 @@ package se.jbee.build;
 import static se.jbee.build.Filter.filter;
 import static se.jbee.build.Folder.folder;
 
-public final class From {
+public final class From implements Comparable<From> {
 
 	public static From[] parseSources(String sources) {
 		String[] sn = sources.split("[ ,]\\s*");
@@ -55,6 +55,20 @@ public final class From {
 		return dir+(pattern.isFiltered()? ":"+pattern.toString() : "")+(depsOnCP ? "+" : "");
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		return this == obj || obj instanceof From && equalTo((From) obj);
+	}
+
+	public boolean equalTo(From other) {
+		return this == other || dir.equalTo(other.dir) && pattern.equalTo(other.pattern);
+	}
+
+	@Override
+	public int hashCode() {
+		return dir.hashCode() ^ pattern.hashCode();
+	}
+
 	public boolean isSuperset(From other) {
 		return isSuperset(this, other);
 	}
@@ -66,5 +80,11 @@ public final class From {
 	public static boolean isSuperset(From a, From b) {
 		return b.dir.equalTo(a.dir)
 				&& (b.pattern.equalTo(a.pattern) || !b.pattern.isFiltered() && a.pattern.isFiltered());
+	}
+
+	@Override
+	public int compareTo(From other) {
+		int res = dir.compareTo(other.dir);
+		return res == 0 ? pattern.compareTo(pattern) : res;
 	}
 }

@@ -1,10 +1,11 @@
 package se.jbee.build;
 
 import static java.lang.Math.max;
+import static se.jbee.build.Filename.file;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Main.main;
 
-public final class To {
+public final class To implements Comparable<To> {
 
 	public static final To TRASH = new To(Type.ERASE, Folder.TRASH, Filename.NO_SPECIFIC, Main.NONE);
 
@@ -25,13 +26,13 @@ public final class To {
 			int fileAt = dest.lastIndexOf('/');
 			Folder dir = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
 			int mainAt = dest.lastIndexOf(':');
-			Filename jar = Filename.file(dest.substring(max(0, fileAt), mainAt));
+			Filename jar = file(dest.substring(max(0, fileAt), mainAt));
 			return jarTo(dir, jar, main(dest.substring(mainAt+1)));
 		}
 		if (dest.endsWith(".jar")) {
 			int fileAt = dest.lastIndexOf('/');
 			Folder dir = fileAt < 0 ? Folder.HOME : folder(dest.substring(0, fileAt));
-			Filename jar = Filename.file(dest.substring(max(0, fileAt)));
+			Filename jar = file(dest.substring(max(0, fileAt)));
 			return jarTo(dir, jar);
 		}
 		return yieldTo(folder(dest));
@@ -76,8 +77,33 @@ public final class To {
 			return new java.io.File(new java.io.File(dir.name), artefact.name);
 	}
 
-	public boolean isDefault() { //FIXME folder is changeable via Var - bad for deciding default or not
+	public boolean isDefault() {
 		return type == Type.YIELD && dir.equalTo(Folder.OUTPUT);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this == obj || obj instanceof To && equalTo((To) obj);
+	}
+
+	public boolean equalTo(To other) {
+		return type == other.type && dir.equalTo(other.dir) && artefact.equalTo(other.artefact) && launcher.equalTo(other.launcher);
+	}
+
+	@Override
+	public int hashCode() {
+		return dir.hashCode() ^ artefact.hashCode(); // good enough
+	}
+
+	@Override
+	public int compareTo(To other) {
+		int res = type.compareTo(other.type);
+		if (res != 0) return res;
+		res = dir.compareTo(other.dir);
+		if (res != 0) return res;
+		res = artefact.compareTo(artefact);
+		if (res != 0) return res;
+		return launcher.compareTo(other.launcher);
 	}
 
 	@Override

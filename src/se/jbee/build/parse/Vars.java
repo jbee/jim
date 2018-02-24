@@ -44,8 +44,9 @@ public final class Vars implements Var {
 	}
 
 	public void define(String name, String val) {
-		if (!vars.containsKey(name) || name.startsWith("default:"))
-			vars.put(name, val);
+		if (vars.containsKey(name) && !name.startsWith("default:"))
+			throw new WrongFormat("Cannot redefine variable", name);
+		vars.put(name, val);
 	}
 
 	@Override
