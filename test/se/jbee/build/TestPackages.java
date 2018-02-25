@@ -57,7 +57,7 @@ public class TestPackages {
 	@Test
 	public void allContainsAnyOtherPackage() {
 		assertTrue(ALL.contains(ROOT));
-		assertTrue(ALL.contains(Package.$));
+		assertTrue(ALL.contains(Package.ANY));
 		assertTrue(ALL.contains(pkg("foo")));
 		assertTrue(ALL.contains(pkg("foo.bar")));
 	}
@@ -65,21 +65,21 @@ public class TestPackages {
 	@Test
 	public void allIncludesAnyOtherPackage() {
 		assertTrue(ALL.includes(ROOT));
-		assertTrue(ALL.includes(Package.$));
+		assertTrue(ALL.includes(Package.ANY));
 		assertTrue(ALL.includes(pkg("foo")));
 		assertTrue(ALL.includes(pkg("foo.bar")));
 	}
 
 	@Test
 	public void noneContainsOnly$() {
-		assertTrue(NONE.contains(Package.$));
+		assertFalse(NONE.contains(Package.ANY));
 		assertFalse(NONE.contains(ROOT));
 		assertFalse(NONE.contains(pkg("foo")));
 	}
 
 	@Test
 	public void noneIncludesOnly$() {
-		assertTrue(NONE.includes(Package.$));
+		assertFalse(NONE.includes(Package.ANY));
 		assertFalse(NONE.includes(ROOT));
 		assertFalse(NONE.includes(pkg("foo")));
 	}
@@ -90,12 +90,12 @@ public class TestPackages {
 		assertTrue(ONLY_FOO.includes(pkg("foo.bar")));
 		assertFalse(ONLY_FOO.includes(pkg("bar")));
 		assertFalse(ONLY_FOO.includes(pkg("bar.foo")));
-		assertFalse(ONLY_FOO.includes(Package.$));
+		assertFalse(ONLY_FOO.includes(Package.ANY));
 		assertTrue(FOO_BAR.includes(pkg("foo")));
 		assertTrue(FOO_BAR.includes(pkg("foo.bar")));
 		assertTrue(FOO_BAR.includes(pkg("bar")));
 		assertTrue(FOO_BAR.includes(pkg("bar.foo")));
-		assertFalse(FOO_BAR.includes(Package.$));
+		assertFalse(FOO_BAR.includes(Package.ANY));
 	}
 
 	@Test
@@ -104,12 +104,12 @@ public class TestPackages {
 		assertFalse(ONLY_FOO.contains(pkg("foo.bar")));
 		assertFalse(ONLY_FOO.contains(pkg("bar")));
 		assertFalse(ONLY_FOO.contains(pkg("bar.foo")));
-		assertFalse(ONLY_FOO.contains(Package.$));
+		assertFalse(ONLY_FOO.contains(Package.ANY));
 		assertTrue(FOO_BAR.contains(pkg("foo")));
 		assertFalse(FOO_BAR.contains(pkg("foo.bar")));
 		assertTrue(FOO_BAR.contains(pkg("bar")));
 		assertFalse(FOO_BAR.contains(pkg("bar.foo")));
-		assertFalse(FOO_BAR.contains(Package.$));
+		assertFalse(FOO_BAR.contains(Package.ANY));
 	}
 
 	@Test

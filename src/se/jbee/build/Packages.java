@@ -9,8 +9,8 @@ import java.util.function.Predicate;
 
 public final class Packages implements Iterable<Package> {
 
-	public static final Packages ALL = new Packages();
-	public static final Packages NONE = new Packages(Package.$);
+	public static final Packages ALL = new Packages(Package.ANY);
+	public static final Packages NONE = new Packages();
 
 	public static Packages parse(String packages) {
 		packages = packages.trim();
@@ -29,8 +29,7 @@ public final class Packages implements Iterable<Package> {
 
 	@Override
 	public String toString() {
-		if (isNone()) return "[]";
-		if (!isLimited()) return "[*]";
+		if (isEmpty()) return "[]";
 		StringBuilder b = new StringBuilder();
 		b.append('[');
 		for (Package p :set)
@@ -48,11 +47,11 @@ public final class Packages implements Iterable<Package> {
 	 * @return Is the given {@link Package} a set member or not
 	 */
 	public boolean contains(Package pkg) {
-		return !isLimited() || any(p -> p.equalTo(pkg));
+		return includesAll() || any(p -> p.equalTo(pkg));
 	}
 
 	public boolean includes(Package pkg) {
-		return !isLimited() || any(p -> p.includes(pkg));
+		return includesAll() || any(p -> p.includes(pkg));
 	}
 
 	public boolean any(Predicate<Package> test) {
@@ -64,23 +63,23 @@ public final class Packages implements Iterable<Package> {
 		return asList(set).iterator();
 	}
 
-	public boolean isLimited() {
-		return set.length > 0;
+	public boolean includesAll() {
+		return set.length == 1 && set[0] == Package.ANY;
 	}
 
-	public boolean isNone() {
-		return set.length == 1 && set[0] == Package.$;
+	public boolean isEmpty() {
+		return set.length == 0;
 	}
 
 	public Packages union(Packages others) {
-		if (isNone() || !others.isLimited()) return others;
-		if (others.isNone() || !isLimited()) return this;
+		if (isEmpty() || others.includesAll()) return others;
+		if (others.isEmpty() || includesAll()) return this;
 		return wrap(Arr.union(set, others.set, Package::equalTo));
 	}
 
 	public Packages subtract(Packages others) {
-		if (!others.isLimited() || isNone()) return NONE;
-		if (others.isNone() || !isLimited()) return this;
+		if (others.includesAll() || isEmpty()) return NONE;
+		if (others.isEmpty() || includesAll()) return this;
 		return wrap(Arr.subtract(set, others.set, Package::equalTo));
 	}
 

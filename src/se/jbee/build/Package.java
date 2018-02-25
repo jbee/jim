@@ -15,11 +15,14 @@ public final class Package implements Comparable<Package> {
 	 */
 	public static final Package ROOT = new Package(".", false);
 
-	static final Package $ = new Package("$", false);
+	/**
+	 * This is a special {@link Package} representing any other package there is.
+	 */
+	static final Package ANY = new Package("*", false);
 
 	public static Package pkg(String name) {
-		if (name.equals("."))
-			return ROOT;
+		if (".".equals(name)) return ROOT;
+		if ("*".equals(name)) return ANY;
 		boolean hub = name.endsWith("+");
 		if (hub)
 			name = name.substring(0, name.length()-1);
@@ -74,7 +77,11 @@ public final class Package implements Comparable<Package> {
 		return name.compareTo(other.name);
 	}
 
+	public boolean isAny() {
+		return this == ANY;
+	}
+
 	public boolean includes(Package other) {
-		return other.path.startsWith(path);
+		return isAny() || other.path.startsWith(path);
 	}
 }

@@ -37,7 +37,7 @@ public final class Dependency {
 	@Override
 	public String toString() {
 		String res = resource.url;
-		if (in.isLimited())
+		if (!in.includesAll())
 			res += " in "+in;
 		if (!to.name.isEmpty())
 			res += " to "+to;
