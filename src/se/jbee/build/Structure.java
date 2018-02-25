@@ -118,10 +118,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 			int dotAt = packageName.indexOf('.', base.name.length());
 			if (packageName.lastIndexOf('.') != dotAt)
 				return false; // has further sub-packages - only allowed for the module itself
-			for (Package p : fanIn)
-				if (packageName.regionMatches(dotAt+1, p.name, 0, p.name.length()))
-					return true; // is one of the accessible siblings
-			return false;
+			return fanIn.any(p -> packageName.regionMatches(dotAt+1, p.name, 0, p.name.length())); // is one of the accessible siblings
 		}
 
 		private static boolean hasModule(String pkg, int at, String s) {

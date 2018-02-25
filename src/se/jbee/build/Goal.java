@@ -6,13 +6,13 @@ public final class Goal {
 	public final From[] srcs;
 	public final To dest;
 	public final Run tool;
-	public final Dependency[] deps;
+	public final Dependencies deps;
 
 	public Goal(Label name) {
-		this(name, new From[0], null, Run.NOTHING, Dependency.NONE);
+		this(name, new From[0], null, Run.NOTHING, Dependencies.NONE);
 	}
 
-	public Goal(Label name, From[] srcs, To dest, Run tool, Dependency[] deps) {
+	public Goal(Label name, From[] srcs, To dest, Run tool, Dependencies deps) {
 		this.name = name;
 		this.srcs = srcs;
 		this.dest = dest;

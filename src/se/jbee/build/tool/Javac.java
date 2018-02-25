@@ -1,122 +1,71 @@
 package se.jbee.build.tool;
 
-import static java.util.Arrays.asList;
+import static java.nio.file.Files.walk;
 import static java.util.Collections.emptyList;
+import static se.jbee.build.Filter.JAVA_SOURCE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import se.jbee.build.Build;
+import se.jbee.build.Dependencies;
+import se.jbee.build.From;
+import se.jbee.build.Goal;
+import se.jbee.build.Home;
+import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
+import se.jbee.build.Timestamp;
+import se.jbee.build.To;
 
 public final class Javac {
 
-	public static void main(String[] argsx) {
-		JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
-		//TODO set output streams (.run(...))
-		final StandardJavaFileManager fm = javac.getStandardFileManager(null, null, null);
-		JavaFileManager wfm = new JavaFileManager() {
+	public static void compile(Build build, Goal goal) {
+		for (From src : goal.srcs)
+			compile(build.since, build.in, src, goal.dest, build.modules, goal.deps);
+	}
 
-			@Override
-			public int isSupportedOption(String option) {
-				return fm.isSupportedOption(option);
+	public static void compile(Timestamp since, Home in, From src, To dest, Structure modules, Dependencies deps) {
+		final JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
+		try (StandardJavaFileManager sfm = javac.getStandardFileManager(null, null, null)) {
+			//TODO each source can cause multiple parts in case dependencies are limited to a subpackage of the main level package
+			// in such cases the sub-package with a special dependency is compiled first - that might cause compilation of some classes in the main level that the sub-package dependends upon
+			// than rest of files are compiled - last modified is used to determine if compilation is needed
+			for (Module m : modules) {
+
+				Iterable<? extends JavaFileObject> sources = sfm.getJavaFileObjectsFromFiles(javaFiles(in, src));
+				CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, m), null, args(in, src, dest, m, deps), null, sources);
+				task.call();
 			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
 
-			@Override
-			public ClassLoader getClassLoader(Location location) {
-				return fm.getClassLoader(location);
+	public static Iterable<? extends File> javaFiles(Home home, From src) {
+		return () -> {
+			try {
+				return walk(src.dir.toFile(home).toPath()).filter(JAVA_SOURCE).filter(src.pattern).map(p -> p.toFile()).iterator();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
-
-			@Override
-			public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds,
-					boolean recurse) throws IOException {
-				System.out.println("list  "+packageName+" ["+recurse+"]"+kinds);
-				Iterable<JavaFileObject> list = fm.list(location, packageName, kinds, recurse);
-				if (packageName.equals("a.b"))
-					return new ArrayList<>();
-				return list;
-			}
-
-			@Override
-			public String inferBinaryName(Location location, JavaFileObject file) {
-				return fm.inferBinaryName(location, file);
-			}
-
-			@Override
-			public boolean isSameFile(FileObject a, FileObject b) {
-				return fm.isSameFile(a, b);
-			}
-
-			@Override
-			public boolean handleOption(String current, Iterator<String> remaining) {
-				return fm.handleOption(current, remaining);
-			}
-
-			@Override
-			public boolean hasLocation(Location location) {
-				return fm.hasLocation(location);
-			}
-
-			@Override
-			public JavaFileObject getJavaFileForInput(Location location, String className, Kind kind)
-					throws IOException {
-				System.out.println("j in "+className);
-				return fm.getJavaFileForInput(location, className, kind);
-			}
-
-			@Override
-			public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind,
-					FileObject sibling) throws IOException {
-				System.out.println("j out  "+className);
-				return fm.getJavaFileForOutput(location, className, kind, sibling);
-			}
-
-			@Override
-			public FileObject getFileForInput(Location location, String packageName, String relativeName)
-					throws IOException {
-				System.out.println("in   "+packageName+" "+relativeName);
-				return fm.getFileForInput(location, packageName, relativeName);
-			}
-
-			@Override
-			public FileObject getFileForOutput(Location location, String packageName, String relativeName,
-					FileObject sibling) throws IOException {
-				System.out.println("out   "+packageName+" "+relativeName);
-				return fm.getFileForOutput(location, packageName, relativeName, sibling);
-			}
-
-			@Override
-			public void flush() throws IOException {
-				System.out.println("flush");
-				fm.flush();
-			}
-
-			@Override
-			public void close() throws IOException {
-				System.out.println("close");
-				fm.close();
-			}
-
 		};
-		final List<JavaFileObject> sources = new ArrayList<>();
-		for (JavaFileObject f : fm.getJavaFileObjects(new File("lab/a/A.java"), new File("lab/a/b/B.java")))
-			sources.add(f);
-		List<String> args = asList("-cp", "lab/");
-		CompilationTask task = javac.getTask(null, wfm, null, args, null, sources);
-		task.call();
+	}
+
+	public static List<String> args(Home home, From src, To dest, Module mod, Dependencies deps) {
+		ArrayList<String> cp = new ArrayList<>();
+		return cp;
 	}
 
 	static final class ModuleJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
@@ -132,7 +81,7 @@ public final class Javac {
 		public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse)
 				throws IOException {
 			if (!compiling.isAccessible(packageName))
-				return emptyList();
+				return emptyList(); // should cause a compilation error as class is not found
 			return super.list(location, packageName, kinds, recurse);
 		}
 	}

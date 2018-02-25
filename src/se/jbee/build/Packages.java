@@ -1,10 +1,11 @@
 package se.jbee.build;
 
 import static java.util.Arrays.asList;
-import static java.util.Arrays.copyOf;
+import static se.jbee.build.Arr.map;
 import static se.jbee.build.Package.pkg;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 public final class Packages implements Iterable<Package> {
 
@@ -12,10 +13,7 @@ public final class Packages implements Iterable<Package> {
 
 	public static Packages parse(String packages) {
 		String[] members = packages.trim().replaceAll("[\\[\\]]+", "").split("[ ,]\\s*");
-		Package[] res = new Package[members.length];
-		for (int i = 0; i < members.length; i++)
-			res[i] = pkg(members[i]);
-		return new Packages(res);
+		return members.length == 0 ? NONE : new Packages(map(members, m -> pkg(m)));
 	}
 
 	private final Package[] set;
@@ -36,19 +34,27 @@ public final class Packages implements Iterable<Package> {
 		return b.toString();
 	}
 
+	/**
+	 * OBS! This will not check for sub-packages.
+	 *
+	 * @see #includes(Package)
+	 *
+	 * @return Is the given {@link Package} a set member or not
+	 */
 	public boolean contains(Package pkg) {
-		for (int i = 0; i < set.length; i++)
-			if (set[i].equalTo(pkg))
-				return true;
-		return false;
+		return any(p -> p.equalTo(pkg));
+	}
+
+	public boolean includes(Package pkg) {
+		return any(p -> p.includes(pkg));
+	}
+
+	public boolean any(Predicate<Package> test) {
+		return Arr.any(set, test);
 	}
 
 	public Packages add(Package pkg) {
-		if (contains(pkg))
-			return this;
-		Package[] res = copyOf(set, set.length + 1);
-		res[set.length] = pkg;
-		return new Packages(res);
+		return wrap(Arr.add(set, pkg, Package::equalTo));
 	}
 
 	@Override
@@ -65,30 +71,15 @@ public final class Packages implements Iterable<Package> {
 	}
 
 	public Packages union(Packages others) {
-		if (others.set.length == 0)
-			return this;
-		if (set.length == 0)
-			return others;
-		Package[] res = copyOf(set, set.length + others.set.length);
-		int j = set.length;
-		for (int i = 0; i < others.set.length; i++) {
-			if (!contains(others.set[i]))
-				res[j++] = others.set[i];
-		}
-		if (j < res.length)
-			res = copyOf(res, j);
-		return new Packages(res);
+		return wrap(Arr.union(set, others.set, Package::equalTo));
 	}
 
 	public Packages subtract(Packages others) {
-		if (others.set.length == 0 || set.length == 0)
-			return this;
-		Package[] res = new Package[set.length];
-		int i = 0;
-		for (Package p : this)
-			if (!others.contains(p))
-				res[i++] = p;
-		return i == set.length ? this : new Packages(copyOf(res, i));
+		return wrap(Arr.subtract(set, others.set, Package::equalTo));
+	}
+
+	private Packages wrap(Package[] set) {
+		return set == this.set ? this : new Packages(set);
 	}
 
 }

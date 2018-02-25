@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import se.jbee.build.Dependency;
 import se.jbee.build.Home;
-import se.jbee.build.B;
+import se.jbee.build.KB;
 
 public final class Fetch {
 
@@ -38,7 +38,7 @@ public final class Fetch {
 			watcher.start();
 			URL artefact = new URL(dep.resource.url);
 			System.out.println("Downloading "+artefact+" to "+target);
-			System.out.println(B.from(artefact));
+			System.out.println(KB.from(artefact));
 			fetch(artefact, target);
 			watcher.interrupt();
 			checkSHA1(dep, target);
@@ -54,7 +54,7 @@ public final class Fetch {
 			return;
 		System.out.println("Warning: The .sha1 of the remote dependencies should be checked into source control.");
 		URL src = new URL(dep.resource.url+".sha1");
-		B sha1 = B.from(src);
+		KB sha1 = KB.from(src);
 		if (!sha1.isUnknown()) {
 			fetch(src, target);
 			if (!checkSHA1(data, target)) {

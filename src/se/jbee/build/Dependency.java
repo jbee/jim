@@ -11,15 +11,6 @@ import static se.jbee.build.Url.url;
  */
 public final class Dependency {
 
-	public static final Dependency[] NONE = new Dependency[0];
-
-	public static Dependency[] dependencies(Url... dependencies) {
-		Dependency[] deps = dependencies.length == 0 ? NONE : new Dependency[dependencies.length];
-		for (int i = 0; i < deps.length; i++)
-			deps[i] = new Dependency(dependencies[i], Packages.NONE, Run.to);
-		return deps;
-	}
-
 	public static Dependency parseDependency(String expr, Folder toDefault) {
 		int inAt = expr.indexOf(" in ");
 		int toAt = expr.indexOf(" to ", max(0, inAt));
@@ -50,13 +41,15 @@ public final class Dependency {
 	@Override
 	public String toString() {
 		String res = resource.url;
-		if (in.count() > 0) {
+		if (in.count() > 0)
 			res += " in "+in;
-		}
-		if (!to.name.isEmpty()) {
+		if (!to.name.isEmpty())
 			res += " to "+to;
-		}
 		return res;
+	}
+
+	public boolean appliesTo(Package pkg) {
+		return in.isEmpty() || in.includes(pkg);
 	}
 
 }

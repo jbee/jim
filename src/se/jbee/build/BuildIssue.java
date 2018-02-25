@@ -59,7 +59,7 @@ public abstract class BuildIssue extends RuntimeException {
 	public static final class MissingGoal extends BuildIssue {
 
 		public MissingGoal(Label goal, Build build) {
-			super("Referenced goal does not exist: "+goal+"\nAvailable are: "+Label.toString(build.goals()));
+			super("Referenced goal does not exist: "+goal+"\nAvailable are: "+Arr.toString(build.goals(), " "));
 		}
 	}
 

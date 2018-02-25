@@ -7,19 +7,19 @@ import java.net.URL;
 /**
  * File size in bytes.
  */
-public final class B {
+public final class KB {
 
-	public static final B UNKNOWN = new B(-1);
+	public static final KB UNKNOWN = new KB(-1);
 
-	public static B from(URL url) {
+	public static KB from(URL url) {
 		HttpURLConnection conn = null;
 		try {
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("HEAD");
 			conn.getInputStream();
-			return new B(conn.getContentLength());
+			return new KB(conn.getContentLength());
 		} catch (IOException e) {
-			return B.UNKNOWN;
+			return KB.UNKNOWN;
 		} finally {
 			if (conn != null) conn.disconnect();
 		}
@@ -27,7 +27,7 @@ public final class B {
 
 	public final int bytes;
 
-	public B(int bytes) {
+	public KB(int bytes) {
 		super();
 		this.bytes = bytes;
 	}

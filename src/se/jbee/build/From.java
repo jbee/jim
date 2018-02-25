@@ -23,7 +23,7 @@ public final class From implements Comparable<From> {
 		int colon = source.indexOf(':');
 		return colon > 0
 				? new From(folder(source.substring(0, colon)), filter(source.substring(colon + 1)), depsOnCP, depsInJar)
-				: new From(folder(source), depsOnCP, depsInJar);
+				: new From(folder(source), Filter.UNFILTERED, depsOnCP, depsInJar);
 	}
 
 	public final Folder dir;
@@ -39,8 +39,8 @@ public final class From implements Comparable<From> {
 	 */
 	public final boolean depsInJar;
 
-	public From(Folder dir, boolean depsOnCP, boolean depsInJar) {
-		this(dir, Filter.UNFILTERED, depsOnCP, depsInJar);
+	public From(Folder dir, Filter filter) {
+		this(dir, filter, false, false);
 	}
 
 	public From(Folder dir, Filter filter, boolean depsOnCP, boolean depsInJar) {

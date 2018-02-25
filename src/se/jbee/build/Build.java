@@ -1,14 +1,19 @@
 package se.jbee.build;
 
+import static se.jbee.build.Arr.first;
+import static se.jbee.build.Arr.map;
+
 public final class Build {
 
-	public final Home home;
+	public final Timestamp since;
+	public final Home in;
 	public final Structure modules;
 	public final Goal[] goals;
 	public final Sequence[] sequences;
 
-	public Build(Home home, Structure modules, Goal[] goals, Sequence[] sequences) {
-		this.home = home;
+	public Build(Timestamp since, Home in, Structure modules, Goal[] goals, Sequence[] sequences) {
+		this.since = since;
+		this.in = in;
 		this.modules = modules;
 		this.goals = goals;
 		this.sequences = sequences;
@@ -22,17 +27,11 @@ public final class Build {
 	}
 
 	public Goal goal(Label name) {
-		for (Goal g : goals)
-			if (g.name.equalTo(name))
-				return g;
-		throw new BuildIssue.MissingGoal(name, this);
+		return first(goals, g -> g.name.equalTo(name), new BuildIssue.MissingGoal(name, this));
 	}
 
 	public Label[] goals() {
-		Label[] res = new Label[goals.length];
-		for (int i = 0; i < goals.length; i++)
-			res[i] = goals[i].name;
-		return res;
+		return goals.length == 0 ? new Label[0] : map(goals, g -> g.name);
 	}
 
 	@Override

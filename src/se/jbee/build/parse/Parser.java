@@ -1,10 +1,13 @@
 package se.jbee.build.parse;
 
+import static java.lang.Long.parseLong;
 import static java.util.Arrays.copyOfRange;
+import static se.jbee.build.Dependencies.dependencies;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
 import static se.jbee.build.Run.run;
+import static se.jbee.build.Timestamp.timestamp;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,9 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import se.jbee.build.Build;
+import se.jbee.build.Dependencies;
 import se.jbee.build.Dependency;
-import se.jbee.build.To;
 import se.jbee.build.Folder;
+import se.jbee.build.From;
 import se.jbee.build.Goal;
 import se.jbee.build.Home;
 import se.jbee.build.Label;
@@ -29,9 +33,9 @@ import se.jbee.build.Package;
 import se.jbee.build.Packages;
 import se.jbee.build.Run;
 import se.jbee.build.Sequence;
-import se.jbee.build.From;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
+import se.jbee.build.To;
 import se.jbee.build.Url;
 import se.jbee.build.WrongFormat;
 
@@ -112,7 +116,8 @@ public final class Parser implements AutoCloseable {
 		} catch (WrongFormat e) {
 			throw e.at(in.lineNr, in.lastLine);
 		}
-		return new Build(home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
+		long since = parseLong(in.vars.resolve(Var.TIME_NOW, in.vars));
+		return new Build(timestamp(since), home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
 	}
 
 	private static boolean isComment(String line) {
@@ -247,7 +252,7 @@ public final class Parser implements AutoCloseable {
 		return run.use(runners.get(tool));
 	}
 
-	private Dependency[] parseDependencies() throws IOException {
+	private Dependencies parseDependencies() throws IOException {
 		List<Dependency> dependencies = new ArrayList<>();
 		String line = readLine();
 		Dependency group = null;
@@ -269,7 +274,7 @@ public final class Parser implements AutoCloseable {
 			line = readLine();
 		}
 		unreadLine();
-		return dependencies.toArray(new Dependency[0]);
+		return dependencies(dependencies);
 	}
 
 	private Sequence parseSequence() throws IOException {

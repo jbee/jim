@@ -1,10 +1,9 @@
 package se.jbee.build;
 
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static se.jbee.build.Arr.concat;
 import static se.jbee.build.BuildIssue.failure;
-import static se.jbee.build.Dependency.dependencies;
+import static se.jbee.build.Dependencies.dependencies;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 
@@ -19,7 +18,7 @@ public final class Run {
 	public final Label tool;
 	public final String [] args;
 	public final Main impl;
-	public final Dependency[] deps;
+	public final Dependencies deps;
 
 	public static Run parse(String run) {
 		String[] nameAndArgs = run.split("\\s+");
@@ -33,10 +32,10 @@ public final class Run {
 	}
 
 	private Run(Label tool, String... args) {
-		this(tool, args, null, Dependency.NONE);
+		this(tool, args, null, Dependencies.NONE);
 	}
 
-	private Run(Label tool, String[] args, Main impl, Dependency[] deps) {
+	private Run(Label tool, String[] args, Main impl, Dependencies deps) {
 		this.tool = tool;
 		this.args = args;
 		this.impl = impl;
@@ -56,9 +55,7 @@ public final class Run {
 			throw failure("Expected a tool with main class but got: "+tool);
 		if (!this.tool.equalTo(tool.tool))
 			throw new WrongFormat("Expected '"+this.tool+"' in runner file but found", tool.tool.name);
-		String[] args = copyOf(tool.args, tool.args.length+this.args.length);
-		arraycopy(this.args, 0, args, tool.args.length, this.args.length);
-		return new Run(this.tool, args, tool.impl, tool.deps);
+		return new Run(this.tool, concat(tool.args, args), tool.impl, tool.deps);
 	}
 
 	@Override

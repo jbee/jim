@@ -2,11 +2,15 @@ package se.jbee.build;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-public final class Filter implements Comparable<Filter>, FilenameFilter {
+public final class Filter implements Comparable<Filter>, FilenameFilter, Predicate<Path>, PathMatcher {
 
 	public static final Filter UNFILTERED = new Filter("*");
+	public static final Filter JAVA_SOURCE = new Filter("*.java");
 
 	/**
 	 * <pre>
@@ -32,6 +36,16 @@ public final class Filter implements Comparable<Filter>, FilenameFilter {
 	@Override
 	public boolean accept(File dir, String name) {
 		return matches(name);
+	}
+
+	@Override
+	public boolean test(Path path) {
+		return matches(path);
+	}
+
+	@Override
+	public boolean matches(Path path) {
+		return !isFiltered() || matches(path.getFileName().toString());
 	}
 
 	public boolean isFiltered() {

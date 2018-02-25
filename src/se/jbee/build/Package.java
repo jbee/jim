@@ -63,8 +63,16 @@ public final class Package implements Comparable<Package> {
 		return this == other || name == other.name; // interned names
 	}
 
+	public boolean parentOf(Package other) {
+		return other.path.length() > path.length() && includes(other);
+	}
+
 	@Override
 	public int compareTo(Package other) {
 		return name.compareTo(other.name);
+	}
+
+	public boolean includes(Package other) {
+		return other.path.startsWith(path);
 	}
 }
