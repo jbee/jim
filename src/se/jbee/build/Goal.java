@@ -28,12 +28,10 @@ public final class Goal {
 			b.append(src).append(' ');
 		b.setLength(b.length()-1);
 		b.append("]");
-		if (!dest.isDefault()) {
+		if (!dest.isDefault())
 			b.append(" to ").append(dest);
-		}
-		if (!tool.isNothing()) {
+		if (!tool.isNothing())
 			b.append(" run ").append(tool);
-		}
 		for (Dependency dep : deps)
 			b.append("\n\t").append(dep);
 		return b.toString();

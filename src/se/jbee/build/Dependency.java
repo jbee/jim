@@ -15,10 +15,10 @@ public final class Dependency {
 		int inAt = expr.indexOf(" in ");
 		int toAt = expr.indexOf(" to ", max(0, inAt));
 		if (inAt < 0 && toAt < 0)
-			return new Dependency(url(expr), Packages.NONE, toDefault);
+			return new Dependency(url(expr), Packages.ALL, toDefault);
 		Url source = url(expr.substring(0, expr.indexOf(' ')));
 		Packages in = inAt < 0
-				? Packages.NONE
+				? Packages.ALL
 				: Packages.parse(expr.substring(expr.indexOf('[', inAt) + 1, expr.indexOf(']', inAt)));
 		Folder to = toAt < 0 ? toDefault : folder(expr.substring(toAt+4).trim());
 		return new Dependency(source, in, to);
@@ -34,22 +34,14 @@ public final class Dependency {
 		this.to = to;
 	}
 
-	public boolean isLimitedToPackage() {
-		return !in.isEmpty();
-	}
-
 	@Override
 	public String toString() {
 		String res = resource.url;
-		if (in.count() > 0)
+		if (in.isLimited())
 			res += " in "+in;
 		if (!to.name.isEmpty())
 			res += " to "+to;
 		return res;
-	}
-
-	public boolean appliesTo(Package pkg) {
-		return in.isEmpty() || in.includes(pkg);
 	}
 
 }

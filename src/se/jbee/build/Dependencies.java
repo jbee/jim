@@ -1,6 +1,8 @@
 package se.jbee.build;
 
 import static java.util.Arrays.asList;
+import static se.jbee.build.Arr.filter;
+import static se.jbee.build.Arr.map;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,18 +12,18 @@ public final class Dependencies implements Iterable<Dependency> {
 
 	public static final Dependencies NONE = new Dependencies(new Dependency[0]);
 
-	public static Dependencies dependencies(Dependency...dependencies) {
-		return dependencies == null || dependencies.length == 0 ? NONE : new Dependencies(dependencies);
+	public static Dependencies dependsOn(Dependency...deps) {
+		return deps == null || deps.length == 0 ? NONE : new Dependencies(deps);
 	}
 
-	public static Dependencies dependencies(Collection<Dependency> dependencies) {
-		return dependencies(dependencies.toArray(new Dependency[0]));
+	public static Dependencies dependsOn(Collection<Dependency> dependencies) {
+		return dependsOn(dependencies.toArray(new Dependency[0]));
 	}
 
-	public static Dependencies dependencies(Url... dependencies) {
-		if (dependencies.length == 0)
+	public static Dependencies dependsOn(Url... deps) {
+		if (deps.length == 0)
 			return NONE;
-		return dependencies(Arr.map(dependencies, url -> new Dependency(url, Packages.NONE, Run.to)));
+		return dependsOn(map(deps, url -> new Dependency(url, Packages.ALL, Run.to)));
 	}
 
 	private final Dependency[] deps;
@@ -40,7 +42,7 @@ public final class Dependencies implements Iterable<Dependency> {
 	}
 
 	public Dependencies in(Package pkg) {
-		return wrap(Arr.filter(deps, dep -> dep.appliesTo(pkg)));
+		return wrap(filter(deps, dep -> dep.in.includes(pkg)));
 	}
 
 	@Override

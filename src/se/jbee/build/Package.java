@@ -15,6 +15,8 @@ public final class Package implements Comparable<Package> {
 	 */
 	public static final Package ROOT = new Package(".", false);
 
+	static final Package $ = new Package("$", false);
+
 	public static Package pkg(String name) {
 		if (name.equals("."))
 			return ROOT;

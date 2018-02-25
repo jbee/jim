@@ -2,7 +2,7 @@ package se.jbee.build.parse;
 
 import static java.lang.Long.parseLong;
 import static java.util.Arrays.copyOfRange;
-import static se.jbee.build.Dependencies.dependencies;
+import static se.jbee.build.Dependencies.dependsOn;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
@@ -264,7 +264,7 @@ public final class Parser implements AutoCloseable {
 			} else {
 				if (line.startsWith("\t\t") && group != null) {
 					dep = new Dependency(dep.resource,
-						dep.in == Packages.NONE ? group.in : dep.in,
+						dep.in == Packages.ALL ? group.in : dep.in,
 						dep.to == to ? group.to : dep.to);
 				} else {
 					group = null;
@@ -274,7 +274,7 @@ public final class Parser implements AutoCloseable {
 			line = readLine();
 		}
 		unreadLine();
-		return dependencies(dependencies);
+		return dependsOn(dependencies);
 	}
 
 	private Sequence parseSequence() throws IOException {

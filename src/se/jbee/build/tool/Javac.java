@@ -43,7 +43,7 @@ public final class Javac {
 			// in such cases the sub-package with a special dependency is compiled first - that might cause compilation of some classes in the main level that the sub-package dependends upon
 			// than rest of files are compiled - last modified is used to determine if compilation is needed
 			for (Module m : modules) {
-
+				Dependencies moduleDeps = deps.in(m.module);
 				Iterable<? extends JavaFileObject> sources = sfm.getJavaFileObjectsFromFiles(javaFiles(in, src));
 				CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, m), null, args(in, src, dest, m, deps), null, sources);
 				task.call();

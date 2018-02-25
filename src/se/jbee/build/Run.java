@@ -3,7 +3,7 @@ package se.jbee.build;
 import static java.util.Arrays.copyOfRange;
 import static se.jbee.build.Arr.concat;
 import static se.jbee.build.BuildIssue.failure;
-import static se.jbee.build.Dependencies.dependencies;
+import static se.jbee.build.Dependencies.dependsOn;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 
@@ -47,7 +47,7 @@ public final class Run {
 	}
 
 	public Run connect(Main impl, Url...dependencies) {
-		return new Run(tool, args, impl, dependencies(dependencies));
+		return new Run(tool, args, impl, dependsOn(dependencies));
 	}
 
 	public Run use(Run tool) {
