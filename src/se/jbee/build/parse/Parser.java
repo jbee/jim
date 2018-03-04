@@ -197,7 +197,7 @@ public final class Parser implements AutoCloseable {
 			String[] sets = line.split("\\]\\[");
 			Packages aboveLevel = above;
 			for (String set : sets) {
-				Packages packages = Packages.parse(set);
+				Packages packages = Packages.parsePackages(set);
 				Packages plusList = aboveLevel.union(packages);
 				for (Package p : packages)
 					modules.add(new Module(base, p, level, p.hub ? plusList : above));

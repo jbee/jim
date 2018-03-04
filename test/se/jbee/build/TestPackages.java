@@ -64,10 +64,10 @@ public class TestPackages {
 
 	@Test
 	public void allIncludesAnyOtherPackage() {
-		assertTrue(ALL.includes(ROOT));
-		assertTrue(ALL.includes(Package.ANY));
-		assertTrue(ALL.includes(pkg("foo")));
-		assertTrue(ALL.includes(pkg("foo.bar")));
+		assertTrue(ALL.effectiveIn(ROOT));
+		assertTrue(ALL.effectiveIn(Package.ANY));
+		assertTrue(ALL.effectiveIn(pkg("foo")));
+		assertTrue(ALL.effectiveIn(pkg("foo.bar")));
 	}
 
 	@Test
@@ -79,23 +79,23 @@ public class TestPackages {
 
 	@Test
 	public void noneIncludesOnly$() {
-		assertFalse(NONE.includes(Package.ANY));
-		assertFalse(NONE.includes(ROOT));
-		assertFalse(NONE.includes(pkg("foo")));
+		assertFalse(NONE.effectiveIn(Package.ANY));
+		assertFalse(NONE.effectiveIn(ROOT));
+		assertFalse(NONE.effectiveIn(pkg("foo")));
 	}
 
 	@Test
 	public void someIncludesItselfAndItsSubpackages() {
-		assertTrue(ONLY_FOO.includes(pkg("foo")));
-		assertTrue(ONLY_FOO.includes(pkg("foo.bar")));
-		assertFalse(ONLY_FOO.includes(pkg("bar")));
-		assertFalse(ONLY_FOO.includes(pkg("bar.foo")));
-		assertFalse(ONLY_FOO.includes(Package.ANY));
-		assertTrue(FOO_BAR.includes(pkg("foo")));
-		assertTrue(FOO_BAR.includes(pkg("foo.bar")));
-		assertTrue(FOO_BAR.includes(pkg("bar")));
-		assertTrue(FOO_BAR.includes(pkg("bar.foo")));
-		assertFalse(FOO_BAR.includes(Package.ANY));
+		assertTrue(ONLY_FOO.effectiveIn(pkg("foo")));
+		assertTrue(ONLY_FOO.effectiveIn(pkg("foo.bar")));
+		assertFalse(ONLY_FOO.effectiveIn(pkg("bar")));
+		assertFalse(ONLY_FOO.effectiveIn(pkg("bar.foo")));
+		assertFalse(ONLY_FOO.effectiveIn(Package.ANY));
+		assertTrue(FOO_BAR.effectiveIn(pkg("foo")));
+		assertTrue(FOO_BAR.effectiveIn(pkg("foo.bar")));
+		assertTrue(FOO_BAR.effectiveIn(pkg("bar")));
+		assertTrue(FOO_BAR.effectiveIn(pkg("bar.foo")));
+		assertFalse(FOO_BAR.effectiveIn(Package.ANY));
 	}
 
 	@Test

@@ -1,9 +1,11 @@
 package se.jbee.build;
 
 import static java.util.Arrays.asList;
+import static se.jbee.build.Arr.equalSets;
 import static se.jbee.build.Arr.map;
 import static se.jbee.build.Package.pkg;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
@@ -12,7 +14,7 @@ public final class Packages implements Iterable<Package> {
 	public static final Packages ALL = new Packages(Package.ANY);
 	public static final Packages NONE = new Packages();
 
-	public static Packages parse(String packages) {
+	public static Packages parsePackages(String packages) {
 		packages = packages.trim();
 		if (packages.isEmpty() || "[*]".equals(packages))
 			return ALL;
@@ -42,16 +44,16 @@ public final class Packages implements Iterable<Package> {
 	/**
 	 * OBS! This will not check for sub-packages.
 	 *
-	 * @see #includes(Package)
+	 * @see #effectiveIn(Package)
 	 *
 	 * @return Is the given {@link Package} a set member or not
 	 */
 	public boolean contains(Package pkg) {
-		return includesAll() || any(p -> p.equalTo(pkg));
+		return effectiveAnywhere() || any(p -> p.equalTo(pkg));
 	}
 
-	public boolean includes(Package pkg) {
-		return includesAll() || any(p -> p.includes(pkg));
+	public boolean effectiveIn(Package pkg) {
+		return effectiveAnywhere() || any(p -> p.isEqualToOrParentOf(pkg));
 	}
 
 	public boolean any(Predicate<Package> test) {
@@ -63,7 +65,7 @@ public final class Packages implements Iterable<Package> {
 		return asList(set).iterator();
 	}
 
-	public boolean includesAll() {
+	public boolean effectiveAnywhere() {
 		return set.length == 1 && set[0] == Package.ANY;
 	}
 
@@ -72,19 +74,33 @@ public final class Packages implements Iterable<Package> {
 	}
 
 	public Packages union(Packages others) {
-		if (isEmpty() || others.includesAll()) return others;
-		if (others.isEmpty() || includesAll()) return this;
+		if (isEmpty() || others.effectiveAnywhere()) return others;
+		if (others.isEmpty() || effectiveAnywhere()) return this;
 		return wrap(Arr.union(set, others.set, Package::equalTo));
 	}
 
 	public Packages subtract(Packages others) {
-		if (others.includesAll() || isEmpty()) return NONE;
-		if (others.isEmpty() || includesAll()) return this;
+		if (others.effectiveAnywhere() || isEmpty()) return NONE;
+		if (others.isEmpty() || effectiveAnywhere()) return this;
 		return wrap(Arr.subtract(set, others.set, Package::equalTo));
 	}
 
 	private Packages wrap(Package[] set) {
 		return set == this.set ? this : new Packages(set);
+	}
+
+	public boolean equalTo(Packages other) {
+		return equalSets(set, other.set, Package::equalTo);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Packages && equalTo((Packages) obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(set);
 	}
 
 }

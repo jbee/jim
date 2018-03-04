@@ -4,8 +4,6 @@ package se.jbee.build;
  * Most often a simple package name, like <code>jbee</code> in the full package
  * name <code>se.jbee.build</code>. In {@link Structure#base} this might be a
  * nested package like <code>se.jbee.build</code>.
- *
- * @author jan
  */
 public final class Package implements Comparable<Package> {
 
@@ -17,6 +15,7 @@ public final class Package implements Comparable<Package> {
 
 	/**
 	 * This is a special {@link Package} representing any other package there is.
+	 * It is also parent to any other package.
 	 */
 	static final Package ANY = new Package("*", false);
 
@@ -46,7 +45,7 @@ public final class Package implements Comparable<Package> {
 		this.name = name.intern();
 		this.path = name+".";
 		this.hub = hub;
-		this.module = name.indexOf('.') < 0;
+		this.module = name.indexOf('.') < 0 || ".".endsWith(name);
 	}
 
 	@Override
@@ -69,19 +68,19 @@ public final class Package implements Comparable<Package> {
 	}
 
 	public boolean parentOf(Package other) {
-		return other.path.length() > path.length() && includes(other);
+		return isAny() || other.path.length() > path.length() && other.path.startsWith(path);
 	}
 
 	@Override
 	public int compareTo(Package other) {
-		return name.compareTo(other.name);
+		return -name.compareTo(other.name);
 	}
 
 	public boolean isAny() {
 		return this == ANY;
 	}
 
-	public boolean includes(Package other) {
+	public boolean isEqualToOrParentOf(Package other) {
 		return isAny() || other.path.startsWith(path);
 	}
 }

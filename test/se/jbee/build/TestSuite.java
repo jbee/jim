@@ -12,7 +12,7 @@ import se.jbee.build.tool.TestJavac;
 
 @RunWith(Suite.class)
 @SuiteClasses({ TestFind.class, TestParser.class, TestOptions.class, TestCommand.class, TestJavac.class,
-		TestFilter.class, TestPackage.class, TestPackages.class })
+		TestFilter.class, TestPackage.class, TestPackages.class, TestDependencies.class })
 public class TestSuite {
 	// suite for the project
 }

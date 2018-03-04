@@ -11,23 +11,23 @@ public class TestPackage {
 
 	@Test
 	public void packageIncludesItself() {
-		assertTrue(pkg("foo").includes(pkg("foo")));
+		assertTrue(pkg("foo").isEqualToOrParentOf(pkg("foo")));
 	}
 
 	@Test
 	public void packageIncludesSubpackages() {
-		assertTrue(pkg("foo").includes(pkg("foo.bar")));
+		assertTrue(pkg("foo").isEqualToOrParentOf(pkg("foo.bar")));
 	}
 
 	@Test
 	public void packageNotIncludesSiblings() {
-		assertFalse(pkg("foo").includes(pkg("bar")));
+		assertFalse(pkg("foo").isEqualToOrParentOf(pkg("bar")));
 	}
 
 	@Test
 	public void anyIncludesAll() {
-		assertTrue(ANY.includes(pkg("foo")));
-		assertTrue(ANY.includes(pkg("foo.bar")));
-		assertTrue(ANY.includes(ANY));
+		assertTrue(ANY.isEqualToOrParentOf(pkg("foo")));
+		assertTrue(ANY.isEqualToOrParentOf(pkg("foo.bar")));
+		assertTrue(ANY.isEqualToOrParentOf(ANY));
 	}
 }

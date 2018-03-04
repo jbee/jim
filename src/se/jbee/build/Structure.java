@@ -1,5 +1,7 @@
 package se.jbee.build;
 
+import static se.jbee.build.Package.pkg;
+
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -65,7 +67,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 	}
 
 	/**
-	 * A {@link Module} is a "top level" {@link Package}.
+	 * A {@link Module} is a "main level" {@link Package}.
 	 *
 	 * It is described in term of the {@link Packages} on the same "top level" that
 	 * is can ({@link #fanIn}) and can't access but affect ({@link #fanOut}) in the
@@ -76,6 +78,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 		public final int level;
 		public final Package base;
 		public final Package module;
+		public final Package canonicalName;
 		/**
 		 * The set of other packages this module may depend upon (not including this).
 		 */
@@ -93,6 +96,7 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 			super();
 			this.base = base;
 			this.module = module;
+			this.canonicalName = pkg(base.path+module.name);
 			this.level = level;
 			this.fanIn = fanIn;
 			this.fanOut = fanOut;

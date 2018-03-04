@@ -41,6 +41,16 @@ public interface Arr {
 		return i == a.length ? a : copyOf(res, i);
 	}
 
+	/*
+	 * Arrays as lists
+	 */
+
+	public static <T> T[] append(T[] a, T e) {
+		T[] res = copyOf(a, a.length + 1);
+		res[a.length] = e;
+		return res;
+	}
+
 	public static <T> T[] concat(T[] a, T[] b) {
 		if (a.length == 0)
 			return b;
@@ -78,11 +88,16 @@ public interface Arr {
 	}
 
 	public static <T> T[] add(T[] a, T e, BiPredicate<T, T> eq) {
-		if (any(a, ea -> eq.test(ea, e)))
-			return a;
-		T[] res = copyOf(a, a.length + 1);
-		res[a.length] = e;
-		return res;
+		return any(a, ea -> eq.test(ea, e)) ? a : append(a, e);
+	}
+
+	public static <T> boolean equalSets(T[] a, T[] b, BiPredicate<T, T> eq) {
+		if (a.length != b.length)
+			return false;
+		for (T ea : a)
+			if (!any(b, eb -> eq.test(ea, eb)))
+				return false;
+		return true;
 	}
 
 	/*
@@ -117,4 +132,5 @@ public interface Arr {
 		res.setLength(res.length() - delimiter.length());
 		return res.toString();
 	}
+
 }

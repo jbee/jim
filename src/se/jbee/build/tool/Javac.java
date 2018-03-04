@@ -10,6 +10,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
@@ -24,6 +25,7 @@ import se.jbee.build.Dependencies;
 import se.jbee.build.From;
 import se.jbee.build.Goal;
 import se.jbee.build.Home;
+import se.jbee.build.Package;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.Timestamp;
@@ -43,7 +45,8 @@ public final class Javac {
 			// in such cases the sub-package with a special dependency is compiled first - that might cause compilation of some classes in the main level that the sub-package dependends upon
 			// than rest of files are compiled - last modified is used to determine if compilation is needed
 			for (Module m : modules) {
-				Dependencies moduleDeps = deps.in(m.module);
+				SortedMap<Package, Dependencies> steps = deps.asPackageTreeFor(m.canonicalName);
+
 				Iterable<? extends JavaFileObject> sources = sfm.getJavaFileObjectsFromFiles(javaFiles(in, src));
 				CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, m), null, args(in, src, dest, m, deps), null, sources);
 				task.call();

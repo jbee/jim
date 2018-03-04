@@ -19,7 +19,7 @@ public final class Dependency {
 		Url source = url(expr.substring(0, expr.indexOf(' ')));
 		Packages in = inAt < 0
 				? Packages.ALL
-				: Packages.parse(expr.substring(expr.indexOf('[', inAt) + 1, expr.indexOf(']', inAt)));
+				: Packages.parsePackages(expr.substring(expr.indexOf('[', inAt) + 1, expr.indexOf(']', inAt)));
 		Folder to = toAt < 0 ? toDefault : folder(expr.substring(toAt+4).trim());
 		return new Dependency(source, in, to);
 	}
@@ -37,11 +37,24 @@ public final class Dependency {
 	@Override
 	public String toString() {
 		String res = resource.url;
-		if (!in.includesAll())
+		if (!in.effectiveAnywhere())
 			res += " in "+in;
 		if (!to.name.isEmpty())
 			res += " to "+to;
 		return res;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Dependency && equalTo((Dependency) obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return resource.hashCode(); // good enough
+	}
+
+	public boolean equalTo(Dependency other) {
+		return resource.equalTo(other.resource) && in.equalTo(other.in) && to.equalTo(other.to);
+	}
 }
