@@ -1,16 +1,12 @@
 package se.jbee.build.tool;
 
-import static java.nio.file.Files.walk;
 import static java.util.Collections.emptyList;
-import static se.jbee.build.Filter.JAVA_SOURCE;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
 
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
@@ -20,53 +16,24 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import se.jbee.build.Build;
-import se.jbee.build.Dependencies;
-import se.jbee.build.From;
-import se.jbee.build.Goal;
-import se.jbee.build.Home;
-import se.jbee.build.Package;
-import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
-import se.jbee.build.Timestamp;
-import se.jbee.build.To;
+import se.jbee.build.report.Progress;
 
-public final class Javac {
+public final class Javac implements Compiler {
 
-	public static void compile(Build build, Goal goal) {
-		for (From src : goal.srcs)
-			compile(build.since, build.in, src, goal.dest, build.modules, goal.deps);
-	}
-
-	public static void compile(Timestamp since, Home in, From src, To dest, Structure modules, Dependencies deps) {
+	@Override
+	public void compile(Compilation unit, Progress report) {
 		final JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
 		try (StandardJavaFileManager sfm = javac.getStandardFileManager(null, null, null)) {
-			//TODO each source can cause multiple parts in case dependencies are limited to a subpackage of the main level package
-			// in such cases the sub-package with a special dependency is compiled first - that might cause compilation of some classes in the main level that the sub-package dependends upon
-			// than rest of files are compiled - last modified is used to determine if compilation is needed
-			for (Module m : modules) {
-				SortedMap<Package, Dependencies> steps = deps.asPackageTreeFor(m.canonicalName);
-
-				Iterable<? extends JavaFileObject> sources = sfm.getJavaFileObjectsFromFiles(javaFiles(in, src));
-				CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, m), null, args(in, src, dest, m, deps), null, sources);
-				task.call();
-			}
+			Iterable<? extends JavaFileObject> sources = sfm.getJavaFileObjectsFromFiles(unit.sources);
+			CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, unit.module), null, args(unit), null, sources);
+			task.call();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
-	public static Iterable<? extends File> javaFiles(Home home, From src) {
-		return () -> {
-			try {
-				return walk(src.dir.toFile(home).toPath()).filter(JAVA_SOURCE).filter(src.pattern).map(p -> p.toFile()).iterator();
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		};
-	}
-
-	public static List<String> args(Home home, From src, To dest, Module mod, Dependencies deps) {
+	public static List<String> args(Compilation unit) {
 		ArrayList<String> cp = new ArrayList<>();
 		return cp;
 	}
@@ -88,4 +55,5 @@ public final class Javac {
 			return super.list(location, packageName, kinds, recurse);
 		}
 	}
+
 }
