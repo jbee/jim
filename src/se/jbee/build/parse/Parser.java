@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -130,10 +131,14 @@ public final class Parser implements AutoCloseable {
 		if (!vars.isDefined(Var.COMPILER_GROUP+":java"))
 			vars.define(Var.COMPILER_GROUP+":java", Javac.class.getName());
 		List<CompilerType> res = new ArrayList<>();
+		Map<String, Compiler> compilersByImpl = new IdentityHashMap<>(); // make sure just one impl per type
 		for (Entry<String, String> e : vars) {
 			if (Var.group(e.getKey()).equals(Var.COMPILER_GROUP)) {
 				String fileExtension = Var.name(e.getKey());
-				res.add(new CompilerType(filter("*."+fileExtension), Compiler.newInstance(fileExtension, vars)));
+				String compilerImpl = vars.resolve(Var.compiler(fileExtension));
+				Compiler compiler = compilersByImpl.computeIfAbsent(compilerImpl,
+						k -> Compiler.newInstance(fileExtension, vars));
+				res.add(new CompilerType(filter("*." + fileExtension), compiler));
 			}
 		}
 		return res.toArray(new CompilerType[0]);

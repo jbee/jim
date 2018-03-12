@@ -11,7 +11,7 @@ public interface Compiler {
 
 	static Compiler newInstance(String fileExtension, Var config) {
 		try {
-			Class<?> compiler = Class.forName(config.resolve(Var.COMPILER_GROUP+":"+fileExtension));
+			Class<?> compiler = Class.forName(config.resolve(Var.compiler(fileExtension)));
 			Constructor<?> constructor = compiler.getDeclaredConstructors()[0];
 			return (Compiler)(constructor.getParameterTypes().length == 1
 					? constructor.newInstance(config)

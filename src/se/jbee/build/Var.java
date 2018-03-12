@@ -62,4 +62,6 @@ public interface Var {
 	static String group(String var) { return var.substring(0, var.indexOf(':')); }
 
 	static String name(String var) { return var.substring(var.indexOf(':')+1); }
+
+	static String compiler(String fileExtension) { return COMPILER_GROUP+":"+fileExtension; }
 }
