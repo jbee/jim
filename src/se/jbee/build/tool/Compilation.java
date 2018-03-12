@@ -2,6 +2,7 @@ package se.jbee.build.tool;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import se.jbee.build.Structure.Module;
 import se.jbee.build.Timestamp;
@@ -27,7 +28,7 @@ public final class Compilation {
 	 * The source files to compile, usually {@code .java} files.
 	 * But could be other JVM language source files.
 	 */
-	public final List<File> sources;
+	public final Map<File, List<File>> sources;
 	/**
 	 * The destination root folder
 	 */
@@ -37,7 +38,7 @@ public final class Compilation {
 	 */
 	public final List<File> dependencies;
 
-	public Compilation(Timestamp initiated, Module module, List<File> sources, File destination, List<File> dependencies) {
+	public Compilation(Timestamp initiated, Module module, Map<File, List<File>> sources, File destination, List<File> dependencies) {
 		this.initiated = initiated;
 		this.module = module;
 		this.sources = sources;

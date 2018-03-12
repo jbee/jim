@@ -23,6 +23,17 @@ public class TestDependencies {
 	}
 
 	@Test
+	public void packageTreeWithRootSub() {
+		Folder to = Folder.LIB;
+		Dependency a = new Dependency(url("http://example.com/que"), Packages.ALL, to);
+		Dependency b = new Dependency(url("http://example.com/bar"), parsePackages("[.]"), to);
+
+		SortedMap<Package, Dependencies> deps = dependsOn(a, b).asPackageTreeFor(Package.ROOT);
+		assertEquals(1, deps.size());
+		assertEquals(dependsOn(b, a), deps.get(Package.ROOT));
+	}
+
+	@Test
 	public void packageTreeTwoLevel() {
 		Folder to = Folder.LIB;
 		Dependency a = new Dependency(url("http://example.com/foo"), parsePackages("[a]"), to);

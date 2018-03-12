@@ -7,10 +7,11 @@ v:junit    = 4.12
 se.jbee.build:
 	[.]
 	[parse][tool]
+	[var]
 	[loop]
 	
 compile: [src]
 
 test: [test:Test*.java] run junit4
 
-jar: [src] to jim-{git-tag}.jar
+jar: [src] to jim-{git:tag}.jar

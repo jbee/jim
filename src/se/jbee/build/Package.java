@@ -76,6 +76,10 @@ public final class Package implements Comparable<Package> {
 		return -name.compareTo(other.name);
 	}
 
+	public boolean isRoot() {
+		return this == ROOT;
+	}
+
 	public boolean isAny() {
 		return this == ANY;
 	}
@@ -83,4 +87,5 @@ public final class Package implements Comparable<Package> {
 	public boolean isEqualToOrParentOf(Package other) {
 		return isAny() || other.path.startsWith(path);
 	}
+
 }

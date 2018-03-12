@@ -1,5 +1,6 @@
-package se.jbee.build.parse;
+package se.jbee.build.var;
 
+import se.jbee.build.Var;
 import se.jbee.build.tool.Exec;
 import se.jbee.build.tool.Exec.Output;
 
@@ -27,7 +28,7 @@ public final class Var_git_tag implements Var {
 
 	@Override
 	public String resolve(String var, Var env) {
-		String now = env.resolve("time:now", env);
+		String now = env.resolve("time:now");
 		Output revHEAD = Exec.command("git", "rev-parse", "--short", "HEAD");
 		if (revHEAD.error())
 			return null; // no git available - try next in chain

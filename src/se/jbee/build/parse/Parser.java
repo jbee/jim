@@ -3,6 +3,7 @@ package se.jbee.build.parse;
 import static java.lang.Long.parseLong;
 import static java.util.Arrays.copyOfRange;
 import static se.jbee.build.Dependencies.dependsOn;
+import static se.jbee.build.Filter.filter;
 import static se.jbee.build.Folder.folder;
 import static se.jbee.build.Label.label;
 import static se.jbee.build.Package.pkg;
@@ -19,8 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import se.jbee.build.Build;
+import se.jbee.build.Compiler;
+import se.jbee.build.CompilerType;
 import se.jbee.build.Dependencies;
 import se.jbee.build.Dependency;
 import se.jbee.build.Folder;
@@ -37,7 +41,9 @@ import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.To;
 import se.jbee.build.Url;
+import se.jbee.build.Var;
 import se.jbee.build.WrongFormat;
+import se.jbee.build.tool.Javac;
 
 public final class Parser implements AutoCloseable {
 
@@ -116,8 +122,21 @@ public final class Parser implements AutoCloseable {
 		} catch (WrongFormat e) {
 			throw e.at(in.lineNr, in.lastLine);
 		}
-		long since = parseLong(in.vars.resolve(Var.TIME_NOW, in.vars));
-		return new Build(timestamp(since), home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]));
+		long since = parseLong(in.vars.resolve(Var.TIME_NOW));
+		return new Build(timestamp(since), home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]), in.compilers());
+	}
+
+	private CompilerType[] compilers() {
+		if (!vars.isDefined(Var.COMPILER_GROUP+":java"))
+			vars.define(Var.COMPILER_GROUP+":java", Javac.class.getName());
+		List<CompilerType> res = new ArrayList<>();
+		for (Entry<String, String> e : vars) {
+			if (Var.group(e.getKey()).equals(Var.COMPILER_GROUP)) {
+				String fileExtension = Var.name(e.getKey());
+				res.add(new CompilerType(filter("*."+fileExtension), Compiler.newInstance(fileExtension, vars)));
+			}
+		}
+		return res.toArray(new CompilerType[0]);
 	}
 
 	private static boolean isComment(String line) {
@@ -170,7 +189,7 @@ public final class Parser implements AutoCloseable {
 		while (open >= 0) {
 			int closeAt = line.indexOf('}', open);
 			String var = line.substring(open+1, closeAt);
-			String subst = vars.resolve(var, vars);
+			String subst = vars.resolve(var);
 			line = line.replace("{"+var+"}", subst);
 			open = line.indexOf('{', open + subst.length() - var.length());
 		}
@@ -225,7 +244,7 @@ public final class Parser implements AutoCloseable {
 		From[] from = From.parseSources(line.substring(line.indexOf('[')+1, endOfSourceAt));
 		int toAt = line.indexOf(" to ");
 		int ranAt = line.indexOf(" run ");
-		Folder dir = folder(vars.resolve(Var.DEFAULT_OUTDIR, vars));
+		Folder dir = folder(vars.resolve(Var.DEFAULT_OUTDIR));
 		To to = toAt > 0
 				? To.parseDest(line.substring(toAt + 4, ranAt < 0 ? line.length() : ranAt).trim())
 				: To.yieldTo(dir);
@@ -256,7 +275,7 @@ public final class Parser implements AutoCloseable {
 		List<Dependency> dependencies = new ArrayList<>();
 		String line = readLine();
 		Dependency group = null;
-		Folder to = folder(vars.resolve(Var.DEFAULT_LIBDIR, vars));
+		Folder to = folder(vars.resolve(Var.DEFAULT_LIBDIR));
 		while (line != null && line.startsWith("\t") && !isComment(line)) {
 			Dependency dep = Dependency.parseDependency(line.trim(), to);
 			if (dep.resource.virtual) {

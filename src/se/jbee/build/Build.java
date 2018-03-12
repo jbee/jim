@@ -10,13 +10,15 @@ public final class Build {
 	public final Structure modules;
 	public final Goal[] goals;
 	public final Sequence[] sequences;
+	public final CompilerType[] compilers;
 
-	public Build(Timestamp since, Home in, Structure modules, Goal[] goals, Sequence[] sequences) {
+	public Build(Timestamp since, Home in, Structure modules, Goal[] goals, Sequence[] sequences, CompilerType[] compilers) {
 		this.since = since;
 		this.in = in;
 		this.modules = modules;
 		this.goals = goals;
 		this.sequences = sequences;
+		this.compilers = compilers;
 		linkSequences();
 	}
 

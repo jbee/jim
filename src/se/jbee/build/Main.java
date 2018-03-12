@@ -14,11 +14,11 @@ public final class Main implements Comparable<Main> {
 	}
 
 	public final String cls;
-	public final boolean qulified;
+	public final boolean qualified;
 
 	private Main(String cls) {
 		this.cls = cls.intern();
-		this.qulified = cls.indexOf('.') > 0;
+		this.qualified = cls.indexOf('.') > 0;
 	}
 
 	public boolean isNone() {

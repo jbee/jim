@@ -1,6 +1,6 @@
-package se.jbee.build.parse;
+package se.jbee.build;
 
-import se.jbee.build.Folder;
+import se.jbee.build.parse.Vars;
 
 /**
  * A {@link Var}iable is a placeholder in a <code>build</code> file that is
@@ -32,6 +32,16 @@ public interface Var {
 	String TIME_NOW = "time:now";
 
 	/**
+	 * The compiler group is used to register compilers for different source files.
+	 *
+	 * It should define that implements the {@link Compiler} interface. The actual
+	 * name is the name of the file extension. For example: Java uses
+	 * {@code compiler:java}. Java is only special in that a default is supplied
+	 * automatically if the variable is not defined in the build script.
+	 */
+	String COMPILER_GROUP = "compiler";
+
+	/**
 	 * Resolves the variable with the given name.
 	 *
 	 * For usual implementations this will be a simple grouped name like
@@ -46,4 +56,10 @@ public interface Var {
 	 * @return the resolved value, empty string in case undefined or any other error
 	 */
 	String resolve(String var, Var env);
+
+	default String resolve(String var) { return resolve(var, this); }
+
+	static String group(String var) { return var.substring(0, var.indexOf(':')); }
+
+	static String name(String var) { return var.substring(var.indexOf(':')+1); }
 }

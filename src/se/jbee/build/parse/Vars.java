@@ -3,13 +3,16 @@ package se.jbee.build.parse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import se.jbee.build.Folder;
+import se.jbee.build.Var;
 import se.jbee.build.WrongFormat;
 
-public final class Vars implements Var {
+public final class Vars implements Var, Iterable<Entry<String, String>> {
 
 	/**
 	 * The set of explicitly command line arguments of type {@code -X} that are not
@@ -34,6 +37,11 @@ public final class Vars implements Var {
 		define(DEFAULT_LIBDIR, Folder.LIB.name);
 	}
 
+	@Override
+	public Iterator<Entry<String, String>> iterator() {
+		return vars.entrySet().iterator();
+	}
+
 	private void defineArg(String name, String val) {
 		unusedArgs.add(name);
 		vars.put(name, val);
@@ -44,9 +52,13 @@ public final class Vars implements Var {
 	}
 
 	public void define(String name, String val) {
-		if (vars.containsKey(name) && !name.startsWith("default:"))
+		if (isDefined(name) && !name.startsWith("default:"))
 			throw new WrongFormat("Cannot redefine variable", name);
 		vars.put(name, val);
+	}
+
+	public boolean isDefined(String name) {
+		return vars.containsKey(name);
 	}
 
 	@Override
@@ -77,7 +89,7 @@ public final class Vars implements Var {
 
 	private static String resolveExternal(String var, Var env) {
 		try {
-			Class<?> resolverType = Class.forName(Var.class.getName()+"_"+var.replace(':', '_'));
+			Class<?> resolverType = Class.forName(Var.class.getPackage().getName()+".var.Var_"+var.replace(':', '_'));
 			Var resolver = (Var) resolverType.getDeclaredConstructor().newInstance();
 			return resolver.resolve(var, env);
 		} catch (ClassNotFoundException e) {
