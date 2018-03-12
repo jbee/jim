@@ -19,6 +19,7 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import se.jbee.build.Compilation;
 import se.jbee.build.Compiler;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.report.Progress;

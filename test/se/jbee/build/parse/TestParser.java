@@ -64,8 +64,8 @@ public class TestParser {
 		assertEquals(Run.NOTHING, compile.tool);
 		assertEquals("src", compile.srcs[0].dir.name);
 
-		assertEquals(1, build.compilers.length);
-		assertEquals("*.java", build.compilers[0].fileExtension.pattern);
-		assertNotNull(build.compilers[0].compiler);
+		assertEquals(1, build.tools.length);
+		assertEquals("*.java", build.tools[0].source.pattern);
+		assertNotNull(build.tools[0].compiler);
 	}
 }

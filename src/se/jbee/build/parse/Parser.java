@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 
 import se.jbee.build.Build;
 import se.jbee.build.Compiler;
-import se.jbee.build.CompilerType;
+import se.jbee.build.Tool;
 import se.jbee.build.Dependencies;
 import se.jbee.build.Dependency;
 import se.jbee.build.Folder;
@@ -127,10 +127,10 @@ public final class Parser implements AutoCloseable {
 		return new Build(timestamp(since), home, modules, goals.toArray(new Goal[0]), sequences.toArray(new Sequence[0]), in.compilers());
 	}
 
-	private CompilerType[] compilers() {
+	private Tool[] compilers() {
 		if (!vars.isDefined(Var.COMPILER_GROUP+":java"))
 			vars.define(Var.COMPILER_GROUP+":java", Javac.class.getName());
-		List<CompilerType> res = new ArrayList<>();
+		List<Tool> res = new ArrayList<>();
 		Map<String, Compiler> compilersByImpl = new IdentityHashMap<>(); // make sure just one impl per type
 		for (Entry<String, String> e : vars) {
 			if (Var.group(e.getKey()).equals(Var.COMPILER_GROUP)) {
@@ -138,10 +138,10 @@ public final class Parser implements AutoCloseable {
 				String compilerImpl = vars.resolve(Var.compiler(fileExtension));
 				Compiler compiler = compilersByImpl.computeIfAbsent(compilerImpl,
 						k -> Compiler.newInstance(fileExtension, vars));
-				res.add(new CompilerType(filter("*." + fileExtension), compiler));
+				res.add(new Tool(filter("*." + fileExtension), compiler));
 			}
 		}
-		return res.toArray(new CompilerType[0]);
+		return res.toArray(new Tool[0]);
 	}
 
 	private static boolean isComment(String line) {

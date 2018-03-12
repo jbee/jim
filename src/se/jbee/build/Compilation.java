@@ -1,11 +1,10 @@
-package se.jbee.build.tool;
+package se.jbee.build;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 import se.jbee.build.Structure.Module;
-import se.jbee.build.Timestamp;
 
 /**
  * Description of a compilation group.
