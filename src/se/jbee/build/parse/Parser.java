@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 
 import se.jbee.build.Build;
 import se.jbee.build.Compiler;
-import se.jbee.build.Tool;
 import se.jbee.build.Dependencies;
 import se.jbee.build.Dependency;
+import se.jbee.build.Filter;
 import se.jbee.build.Folder;
 import se.jbee.build.From;
 import se.jbee.build.Goal;
@@ -41,10 +41,12 @@ import se.jbee.build.Sequence;
 import se.jbee.build.Structure;
 import se.jbee.build.Structure.Module;
 import se.jbee.build.To;
+import se.jbee.build.Tool;
 import se.jbee.build.Url;
 import se.jbee.build.Var;
 import se.jbee.build.WrongFormat;
 import se.jbee.build.tool.Javac;
+import se.jbee.build.tool.Yield;
 
 public final class Parser implements AutoCloseable {
 
@@ -141,6 +143,7 @@ public final class Parser implements AutoCloseable {
 				res.add(new Tool(filter("*." + fileExtension), compiler));
 			}
 		}
+		res.add(new Tool(Filter.UNFILTERED, Yield.COPY));
 		return res.toArray(new Tool[0]);
 	}
 

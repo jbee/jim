@@ -93,7 +93,6 @@ public final class Structure implements Iterable<se.jbee.build.Structure.Module>
 		}
 
 		private Module(Package base, Package module, int level, Packages fanIn, Packages fanOut) {
-			super();
 			this.base = base;
 			this.module = module;
 			this.canonicalName = pkg(base.path+module.name);

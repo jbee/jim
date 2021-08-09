@@ -18,7 +18,6 @@ public final class Filename implements Comparable<Filename> {
 	public final String name;
 
 	private Filename(String name) {
-		super();
 		this.name = name;
 	}
 

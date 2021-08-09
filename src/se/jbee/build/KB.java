@@ -28,7 +28,6 @@ public final class KB {
 	public final int bytes;
 
 	public KB(int bytes) {
-		super();
 		this.bytes = bytes;
 	}
 

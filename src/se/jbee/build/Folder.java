@@ -42,7 +42,6 @@ public final class Folder implements Comparable<Folder>, Location {
 	public final boolean virtual;
 
 	private Folder(String folder) {
-		super();
 		this.name = folder;
 		this.virtual = name.equals("*") || name.equals("?");
 	}

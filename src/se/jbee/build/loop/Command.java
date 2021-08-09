@@ -62,7 +62,6 @@ public final class Command {
 	public final Options ops;
 
 	public Command(Label goal, Options ops) {
-		super();
 		this.goal = goal;
 		this.ops = ops;
 	}

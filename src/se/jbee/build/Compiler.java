@@ -14,7 +14,7 @@ import se.jbee.build.report.Progress;
  */
 public interface Compiler {
 
-	void compile(Compilation unit, Progress report);
+	boolean compile(Compilation unit, Progress report);
 
 	/**
 	 * Creates a new instance of a certain compiler. The class name of the

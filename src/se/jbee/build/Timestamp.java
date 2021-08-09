@@ -9,7 +9,6 @@ public final class Timestamp implements Comparable<Timestamp> {
 	public final long millisSinceEpoch;
 
 	private Timestamp(long millisSinceEpoch) {
-		super();
 		this.millisSinceEpoch = millisSinceEpoch;
 	}
 

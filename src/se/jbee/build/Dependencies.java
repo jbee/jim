@@ -34,7 +34,6 @@ public final class Dependencies implements Iterable<Dependency> {
 	private final Dependency[] list;
 
 	private Dependencies(Dependency[] list) {
-		super();
 		this.list = list;
 	}
 

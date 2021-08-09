@@ -14,7 +14,6 @@ public final class Home {
 	public final File dir;
 
 	public Home(File dir) {
-		super();
 		this.dir = dir;
 		if (!dir.isDirectory())
 			throw new IllegalArgumentException("Must be a directory: "+dir);

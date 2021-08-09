@@ -2,9 +2,9 @@ package se.jbee.build.tool;
 
 import static java.util.Collections.emptyList;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -33,34 +33,37 @@ public final class Javac implements Compiler {
 	}
 
 	@Override
-	public void compile(Compilation unit, Progress report) {
+	public boolean compile(Compilation unit, Progress report) {
 		try (StandardJavaFileManager sfm = javac.getStandardFileManager(null, null, null)) {
 			List<JavaFileObject> sources = new ArrayList<>();
-			for (Entry<File, List<File>> sourceFolder : unit.sources.entrySet()) {
-				for (JavaFileObject source : sfm.getJavaFileObjectsFromFiles(sourceFolder.getValue())) {
+			for (Entry<Path, List<Path>> sourceFolder : unit.sources.entrySet()) {
+				for (JavaFileObject source : sfm.getJavaFileObjectsFromFiles(() -> sourceFolder.getValue().stream().map(Path::toFile).iterator())) {
 					sources.add(source);
 				}
 			}
-			CompilationTask task = javac.getTask(null, new ModuleJavaFileManager(sfm, unit.module), null, options(unit), null, sources);
-			task.call();
+			try (ModuleJavaFileManager fileManager = new ModuleJavaFileManager(sfm, unit.module, report)) {
+				CompilationTask task = javac.getTask(null, fileManager, null, options(unit), null, sources);
+				return task.call().booleanValue();
+			}
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			e.printStackTrace(); //TODO report
+			return false;
 		}
 	}
 
 	public static List<String> options(Compilation unit) {
 		ArrayList<String> options = new ArrayList<>();
 		options.add("-d");
-		options.add(unit.destination.getAbsolutePath());
+		options.add(unit.destination.toAbsolutePath().toString());
 		// -implicit none //can be used to suppress generating class files not in source file set
 		// -source
 		// TODO prefer source when ! (bang) is used - also do not include dest dir in cp
 		if (!unit.dependencies.isEmpty()) {
 			options.add("-cp");
 			String cp = "";
-			for (File dep : unit.dependencies) {
+			for (Path dep : unit.dependencies) {
 				if (!cp.isEmpty()) cp += ";";
-				cp += dep.getAbsolutePath();
+				cp += dep.toAbsolutePath();
 			}
 			options.add(cp);
 		}
@@ -70,10 +73,12 @@ public final class Javac implements Compiler {
 	static final class ModuleJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
 		private final Module compiling;
+		private final Progress report;
 
-		protected ModuleJavaFileManager(StandardJavaFileManager fm, Module compiling) {
+		protected ModuleJavaFileManager(StandardJavaFileManager fm, Module compiling, Progress report) {
 			super(fm);
 			this.compiling = compiling;
+			this.report = report;
 		}
 
 		@Override
@@ -87,8 +92,9 @@ public final class Javac implements Compiler {
 		@Override
 		public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind, FileObject sibling)
 				throws IOException {
-			// TODO track progress here
-			return super.getJavaFileForOutput(location, className, kind, sibling);
+			JavaFileObject res = super.getJavaFileForOutput(location, className, kind, sibling);
+			report.ok(Paths.get(res.toUri()));
+			return res;
 		}
 	}
 
